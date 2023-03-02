@@ -1,3 +1,4 @@
+# Прверка Fetch
 class Com:
     def __init__(self, client, command):
         self.cl = client
