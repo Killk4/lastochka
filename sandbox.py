@@ -11,8 +11,10 @@ import colorama
 colorama.init() # Инициализация colorama для работы с цветным текстом в консоли
 success = True # Глобальная переменная для отслеживания успешности выполнения операций
 
-
+################################################################
 def secure_delete(path, passes=5):
+    '''Функция принимает путь к файлу и количество прогонов (по умолчанирю 5)'''
+
     global success # Использование глобальной переменной success
     with open(path, "ba+") as delfile:
         length = delfile.tell() # Определение размера файла
@@ -31,12 +33,12 @@ def secure_delete(path, passes=5):
     except: # Обработка исключений при удалении файла.
         print(colored('ОШИБКА УДАЛЕНИЯ ФАЙЛА. ФАЙЛ МОЖЕТ БЫТЬ УНИЧТОЖЕН.', 'red')) 
         success = False
+################################################################
 
-
-file = './vid.mp4' 
+file = './vid.mp4'  
 
 print(colored('ВЫ УВЕРЕНЫ ЧТО ХОТИТЕ ПРОДОЛЖИТЬ С УНИЧТОЖЕНИЕМ ФАЙЛА? Y/N', 'yellow'))
-check = bool(input()) 
+check = bool(input()) #??? Всегда True!
 
 if check: 
     print(colored('УНИЧТОЖЕНИЕ ФАЙЛА', 'yellow'))

