@@ -1,24 +1,22 @@
-# Прверка Fetch
-class Com:
-    def __init__(self, client, command):
-        self.cl = client
-        self.cm = command
+import os
+import random
 
-command_list = []
 
-while True:
-    com = input('> ')
+def delete_file(file_path):
+    '''Функция удаления файла.
+    Принимает путь к файлу, который нужно удалить
+    Функция открывает файл в режиме ba+, что позволяет открыть файл для чтения и записи в бинарном режиме.
+    Затем функция определяет размер файла и перезаписывает его случайными байтами.
+    После этого функция удаляет файл с диска.'''
 
-    if com[0] == '/':
-        if com[1:] == 'help':
-            print('/destroy [name] - запустить процедуру удаления файлов\n'+
-                  '/status - список клиентов в сети\n'+
-                  '/status [name] - проверить статус клиента по имени')
-        else:
-            com = com[1:].split(' ')
-            
-            if com[0] == 'destroy':
-                try:
-                    print('На компьютер ' + str(com[1] + ' отправлена команда на удаление файлов'))
-                except:
-                    print('Неправильно указана команда. /help для списка всех команд')
+    # Открываем файл в режиме чтения и записи в бинарном режиме
+    with open(file_path, 'ba+') as f:
+        # Определяем размер файла
+        f.seek(0, os.SEEK_END)
+        file_size = f.tell()
+        # Перемещаем указатель в начало файла
+        f.seek(0)
+        # Перезаписываем файл случайными байтами
+        f.write(bytearray(random.getrandbits(8) for _ in range(file_size)))
+    # Удаляем файл с диска
+    os.remove(file_path)
