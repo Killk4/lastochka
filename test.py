@@ -1,10 +1,17 @@
 import os
 
-list = os.listdir('./test/')
+path = './test/'
+list = os.listdir(path)
+list_dir = []
 
-for l in list:
-    if (os.path.isdir(l)):
-        continue
-    else:
-        print(f'{l} файл')
-        print(os.path.isdir(l))
+def isFile(root_path):
+    root_list = os.listdir(root_path)
+
+    for rl in root_list:
+        if (os.path.isdir(root_path+rl)):
+            isFile(root_path+rl)
+        else:
+            print(f'{root_path}/{rl} файл')
+            os.remove(root_path+'/'+rl)
+
+isFile(path)

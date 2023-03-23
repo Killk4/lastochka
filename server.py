@@ -1,14 +1,26 @@
 import socket
 import time
+import os
+
+def myIP():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
 
 def log(text):
     ''' Запись логов в файл logs.txt '''
     ct_date = time.strftime("%d-%m-%Y", time.localtime())    # Текущий день
     ct_time = time.strftime("%H:%M:%S", time.localtime())    # Текущее время
-    file = open('./logs/'+str(ct_date)+'.txt', 'a')          # Открыть файл
-    file.writelines(str(ct_time)+' '+text+'\n')              # Записать в файл
-    print(str(ct_time)+' '+text)                             # Вывести в консоль
-    file.close()                                             # Закрыть файл
+    try:
+        file = open('./logs/'+str(ct_date)+'.txt', 'a')          # Открыть файл
+        file.writelines(str(ct_time)+' '+text+'\n')              # Записать в файл
+        print(str(ct_time)+' '+text)                             # Вывести в консоль
+        file.close()                                             # Закрыть файл
+    except:
+        os.makedirs('logs', 744)
+        log(text)
 
 class Lastochka:
     ''' Класс Lastochka сожержит информацию о клиенте'''
@@ -20,9 +32,9 @@ class Lastochka:
 # Настройки
 SERVER_IP = 'localhost'     # IP сервера
 SERVER_PORT = 10000         # Порт сервера
-
 server_work = True          # Переменная работы сервера
 command = False             # Переменная отправки команды
+ipv4 = myIP()               # IPv4
 
 client_list = []            # Список активных клиентов
 
@@ -33,7 +45,7 @@ main_socket.bind((SERVER_IP, SERVER_PORT)) # Завязка сокета с IP �
 main_socket.setblocking(0) # Не останавливать выполнение программы пока получаем данные
 main_socket.listen(5) # Включение прослушки порта. 5 говорит о количестве одновременно подключаемых клиентов. 5 не максимальное количество клиентов!
 
-log('Сервер запущен')
+log(f'Сервер запущен с адресом {ipv4}:{SERVER_PORT}')
 
 # Создание отладочного окна
 while server_work:

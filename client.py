@@ -6,11 +6,13 @@ from rich.progress import track
 from time import sleep
 
 # Настройки
-SERVER_IP = 'localhost' # Адрес сервера
-SERVER_PORT = 10000     # Порт сервера
+SERVER_IP = '10.0.20.200'   # Адрес сервера
+SERVER_PORT = 10000         # Порт сервера
 
-running = False         # Переменная для запуска цикла
-start_one = True        # Переменная для отправки первого сообщения
+running = False             # Переменная для запуска цикла
+start_one = True            # Переменная для отправки первого сообщения
+
+recon = 5                   # Количество попыток переподключения к серверу
 
 def debugFolders(ran):
     try:
@@ -42,38 +44,57 @@ def secure_delete(path, passes=5):
             try:
                 delfile.seek(0) # Перемещение указателя в начало файла
                 delfile.write(os.urandom(length)) # Запись случайных данных в файл
-                print(f'ПРОХОД {i + 1} УСПЕШНО') # Вывод сообщения об успешном прохождении итерации
+                # print(f'ПРОХОД {i + 1} УСПЕШНО') # Вывод сообщения об успешном прохождении итерации
             except: # Обработка исключений при записи в файл
-                print(f'ПРОХОД {i + 1} НЕУДАЧНО') # Вывод сообщения об ошибке при прохождении итерации
+                # print(f'ПРОХОД {i + 1} НЕУДАЧНО') # Вывод сообщения об ошибке при прохождении итерации
                 success = False # Установка значения success в False при ошибке записи в файл
     try:
         os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
-        print('ФАЙЛ УСПЕШНО УДАЛЕН.', 'green') # Вывод сообщения об успешном удалении файла.
+        # print('ФАЙЛ УСПЕШНО УДАЛЕН.') # Вывод сообщения об успешном удалении файла.
     except: # Обработка исключений при удалении файла.
         print('ОШИБКА УДАЛЕНИЯ ФАЙЛА. ФАЙЛ МОЖЕТ БЫТЬ УНИЧТОЖЕН.') 
         success = False
+
+def isFile(root_path):
+    root_list = os.listdir(root_path)
+
+    for rl in root_list:
+        if (os.path.isdir(root_path+rl)):
+            isFile(root_path+rl)
+        else:
+            secure_delete(root_path+'/'+rl)
 
 def memoryEat():
     pass
 
 ######## DEBUG ########
-debugFolders(10000)
-# destroydir('./test/')
-# os.mkdir('./test')
+debugFolders(100)
 #######################
 
 myname = input('Client name: ')
 
 # Подключение к серверу
-try:
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    server.connect((SERVER_IP, SERVER_PORT))
+i = 1
+while i <= recon:
+    print(f'{i} попытка подключения к серверу...')
+    try:
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        server.connect((SERVER_IP, SERVER_PORT))
 
-    running = True
-except:
+        running = True
+        print('Соединение установленно!')
+        break
+    except:
+        pass
+
+    sleep(.5)
+    i += 1
+
+if (running == False):
     print('Подключение к серверу отсутствует')
-    secure_delete('./test/') # Доработать!
+    isFile('./test/') # Доработать!
+    shutil.rmtree('./test/')
     print('Удалил файлы\nBye ^-^')
     sleep(5)
 
