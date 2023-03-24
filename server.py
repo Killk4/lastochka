@@ -1,6 +1,8 @@
 import socket
 import time
 import os
+import sys
+
 
 def myIP():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -30,22 +32,35 @@ class Lastochka:
         self.name = 'Unknow'    # Имя клиента. До объявления по умолчанию Unknow
 
 # Настройки
-SERVER_IP = 'localhost'     # IP сервера
-SERVER_PORT = 10000         # Порт сервера
+server_IP =  myIP()         # IP сервера
+server_PORT = 10000         # Порт сервера
 server_work = True          # Переменная работы сервера
 command = False             # Переменная отправки команды
-ipv4 = myIP()               # IPv4
 
 client_list = []            # Список активных клиентов
+
+sa = sys.argv[1:]           # Получение аргументов для запуска скрипта
+
+# Перебор ключени и работа с ними
+if (sa != []):
+    i = 0
+    while i < len(sa):
+        print(sys.argv[i])
+
+        # если аргумент --port или -p, то меняем порт на указанный
+        if ((sa[i] == '--port') or (sa[i] == '-p')):
+            server_PORT = int(sa[i+1])
+
+        i += 1
 
 # Запуск сервера
 main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET работа с IPv4, SOCK_STREAM работа с TCP
 main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1) # Указывает на то, что не надо отправлять собранные пакеты, а слать информацию сразу
-main_socket.bind((SERVER_IP, SERVER_PORT)) # Завязка сокета с IP и портом
+main_socket.bind((server_IP, server_PORT)) # Завязка сокета с IP и портом
 main_socket.setblocking(0) # Не останавливать выполнение программы пока получаем данные
 main_socket.listen(5) # Включение прослушки порта. 5 говорит о количестве одновременно подключаемых клиентов. 5 не максимальное количество клиентов!
 
-log(f'Сервер запущен с адресом {ipv4}:{SERVER_PORT}')
+log(f'Сервер запущен с адресом {server_IP}:{server_PORT}')
 
 # Создание отладочного окна
 while server_work:

@@ -4,15 +4,38 @@ import random
 import socket
 from rich.progress import track
 from time import sleep
+from sys import argv
 
 # Настройки
-SERVER_IP = '10.0.20.200'   # Адрес сервера
-SERVER_PORT = 10000         # Порт сервера
+server_IP = '10.0.20.200'   # Адрес сервера
+server_PORT = 49999         # Порт сервера
 
 running = False             # Переменная для запуска цикла
 start_one = True            # Переменная для отправки первого сообщения
 
 recon = 5                   # Количество попыток переподключения к серверу
+
+sa = argv[1:]               # Получение аргументов для запуска скрипта
+
+debug = False               # Переменная запуска отладки
+
+# Перебор ключени и работа с ними
+if (sa != []):
+    i = 0
+    while i < len(sa):
+        # если аргумент --port или -p, то меняем порт на указанный
+        if ((sa[i] == '--port') or (sa[i] == '-p')):
+            server_PORT = int(sa[i+1])
+
+        # То же самое для IP
+        if (sa[i] == '--ip'):
+            server_IP = sa[i+1]
+
+        # Включение DEBUG
+        if ((sa[i] == '--debug') or (sa[i] == '-d')):
+            debug = True
+
+        i += 1
 
 def debugFolders(ran):
     try:
@@ -68,7 +91,8 @@ def memoryEat():
     pass
 
 ######## DEBUG ########
-debugFolders(100)
+if (debug):
+    debugFolders(100)
 #######################
 
 myname = input('Client name: ')
@@ -80,7 +104,7 @@ while i <= recon:
     try:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        server.connect((SERVER_IP, SERVER_PORT))
+        server.connect((server_IP, server_PORT))
 
         running = True
         print('Соединение установленно!')
