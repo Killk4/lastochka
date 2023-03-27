@@ -13,12 +13,12 @@ server_PORT = 4999         # Порт сервера
 
 running = False             # Переменная для запуска цикла
 start_one = True            # Переменная для отправки первого сообщения
-
 recon = 1                   # Количество попыток переподключения к серверу
+debug = False               # Переменная запуска отладки
+delete_files = True         # Если True, то файлы из листа будут удаляться
 
 sa = argv[1:]               # Получение аргументов для запуска скрипта
 
-debug = False               # Переменная запуска отладки
 
 # Папки для удаления
 # Принимает возможности записи ./path/ и D:\\path\\
@@ -44,23 +44,28 @@ if (sa != []):
         if ((sa[i] == '--debug') or (sa[i] == '-d')):
             debug = True
 
+        # Выключение удаления файлов. Нужно только для отладки, так как файлы по итогу всё равно перезапишутся.
+        if (sa[i] == '--nodelete'):
+            delete_files = False
+
         i += 1
 
+# Создаёт тестовые папки и случайным образом наполняет их
 def debugFolders(ran, path):
     try:
-        os.mkdir(path)
+        os.mkdir(path)  # Создание папки с именем переменной path
     except:
         pass
     try:
-        for step in track(range(ran), description='Create debug folders'):
+        for step in track(range(ran), description='Create debug folders'): # Красивая отрисовка прогресс бара в консоли ^-^
             random.seed()
-            tn = random.randint(0, 2**100)
+            tn = random.randint(0, 2**100)  # Огромное число, используется для имени папкиу
             fn = str(step) + str(tn)
             os.mkdir(f'./{path}/{fn}')
             random.seed()
-            if random.randint(0, 1) == 1:
+            if random.randint(0, 1) == 1:   # Если на барабане выпало 1, то создаём файл в папке
                 f = open(f'./{path}/{fn}/{str(step)}.txt', 'a')
-                f.writelines('TEST')
+                f.writelines('TEST')    # Пишем в файл
                 f.close()
     except:
         pass
@@ -76,18 +81,20 @@ def secure_delete(path, passes=5):
             try:
                 delfile.seek(0) # Перемещение указателя в начало файла
                 delfile.write(os.urandom(length)) # Запись случайных данных в файл
-                # print(f'ПРОХОД {i + 1} УСПЕШНО') # Вывод сообщения об успешном прохождении итерации
             except: # Обработка исключений при записи в файл
-                # print(f'ПРОХОД {i + 1} НЕУДАЧНО') # Вывод сообщения об ошибке при прохождении итерации
                 success = False # Установка значения success в False при ошибке записи в файл
     try:
-        os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
-        # print('ФАЙЛ УСПЕШНО УДАЛЕН.') # Вывод сообщения об успешном удалении файла.
+        if (delete_files):
+            os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
     except: # Обработка исключений при удалении файла.
         print('ОШИБКА УДАЛЕНИЯ ФАЙЛА. ФАЙЛ МОЖЕТ БЫТЬ УНИЧТОЖЕН.') 
         success = False
 
 def isFile(root_list):
+    ''' Функция принимает список с путями к папкам которые будут удалены со всем содержимым.
+    Проверяет на наличие файлов внутри. Если он есть, то вызывается функция перезаписи и удаления.
+    Если нет файлов, но есть папка, тогда вызывается рекурсия на подпапку.'''
+
     try:
         for r in root_list:
             list = os.listdir(r)
@@ -99,9 +106,6 @@ def isFile(root_list):
                     secure_delete(f'{r+l}')
     except:
         pass
-
-def memoryEat():
-    pass
 
 ######## DEBUG ########
 if (debug):
@@ -132,11 +136,12 @@ while i <= recon:
 if (running == False):
     print('Подключение к серверу отсутствует')
     isFile(root_list)                           # Удаления файлов в корневом каталоге и во всех подпапках
-    for rl in root_list:                        # Удаление корневого каталога 
-        # try:
-        shutil.rmtree(rl)
-        # except:
-        #     pass
+    if (delete_files):
+        for rl in root_list:                        # Удаление корневого каталога 
+            try:
+                shutil.rmtree(rl)
+            except:
+                pass
     print('Удалил файлы\nBye ^-^')
     sleep(5)
 
