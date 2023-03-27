@@ -9,16 +9,24 @@ from sys import argv
 
 # Настройки
 server_IP = '10.0.20.200'   # Адрес сервера
-server_PORT = 49999         # Порт сервера
+server_PORT = 4999         # Порт сервера
 
 running = False             # Переменная для запуска цикла
 start_one = True            # Переменная для отправки первого сообщения
 
-recon = 5                   # Количество попыток переподключения к серверу
+recon = 1                   # Количество попыток переподключения к серверу
 
 sa = argv[1:]               # Получение аргументов для запуска скрипта
 
 debug = False               # Переменная запуска отладки
+
+# Папки для удаления
+# Принимает возможности записи ./path/ и D:\\path\\
+# Обязательно завершать конец пути
+root_list = ['./test/',
+             './test1/',
+             'C:/todel/'
+             ]
 
 # Перебор ключени и работа с ними
 if (sa != []):
@@ -38,9 +46,9 @@ if (sa != []):
 
         i += 1
 
-def debugFolders(ran):
+def debugFolders(ran, path):
     try:
-        os.mkdir('./test')
+        os.mkdir(path)
     except:
         pass
     try:
@@ -48,10 +56,10 @@ def debugFolders(ran):
             random.seed()
             tn = random.randint(0, 2**100)
             fn = str(step) + str(tn)
-            os.mkdir('./test/'+fn)
+            os.mkdir(f'./{path}/{fn}')
             random.seed()
             if random.randint(0, 1) == 1:
-                f = open('./test/'+fn+'/'+str(step)+'.txt', 'a')
+                f = open(f'./{path}/{fn}/{str(step)}.txt', 'a')
                 f.writelines('TEST')
                 f.close()
     except:
@@ -79,21 +87,26 @@ def secure_delete(path, passes=5):
         print('ОШИБКА УДАЛЕНИЯ ФАЙЛА. ФАЙЛ МОЖЕТ БЫТЬ УНИЧТОЖЕН.') 
         success = False
 
-def isFile(root_path):
-    root_list = os.listdir(root_path)
+def isFile(root_list):
+    try:
+        for r in root_list:
+            list = os.listdir(r)
 
-    for rl in root_list:
-        if (os.path.isdir(root_path+rl)):
-            isFile(root_path+rl)
-        else:
-            secure_delete(root_path+'/'+rl)
+            for l in list:
+                if (os.path.isdir(r+l)):
+                    isFile([f'{r+l}/'])
+                else:
+                    secure_delete(f'{r+l}')
+    except:
+        pass
 
 def memoryEat():
     pass
 
 ######## DEBUG ########
 if (debug):
-    debugFolders(100)
+    debugFolders(1000, 'test')
+    debugFolders(100, 'test1')
 #######################
 
 myname = input('Client name: ')
@@ -118,8 +131,12 @@ while i <= recon:
 
 if (running == False):
     print('Подключение к серверу отсутствует')
-    isFile('./test/') # Доработать!
-    shutil.rmtree('./test/')
+    isFile(root_list)                           # Удаления файлов в корневом каталоге и во всех подпапках
+    for rl in root_list:                        # Удаление корневого каталога 
+        # try:
+        shutil.rmtree(rl)
+        # except:
+        #     pass
     print('Удалил файлы\nBye ^-^')
     sleep(5)
 
