@@ -3,26 +3,46 @@ import os
 import shutil
 import random
 import socket
+import configparser
 from rich.progress import track
 from time import sleep
 from sys import argv
 
-# Настройки
-server_IP = '10.0.20.200'       # Адрес сервера
-server_PORT = 49999             # Порт сервера
+# Инициализация файла конфигурации
+config = configparser.ConfigParser()
+config.read('client_config.ini')
+try:
+    if(config['CONFIG']):
+        pass
+except:
+    config['CONFIG'] = {
+        'server_ip':'10.0.20.200',
+        'server_port':'49999',
+        'running':'True',
+        'recon':'5',
+        'debug':'False',
+        'delete':'True'
+    }
 
-running = False                 # Переменная для запуска цикла
+    with open('client_config.ini', 'w') as configfile:
+        config.write(configfile)
+
+# Настройки
+server_IP = config['CONFIG']['server_ip']           # Адрес сервера
+server_PORT = int(config['CONFIG']['server_port'])  # Порт сервера
+
+recon = int(config['CONFIG']['recon'])         # Количество попыток переподключения к серверу
+debug = config['CONFIG']['debug']              # Переменная запуска отладки
+running = config['CONFIG']['running']          # Переменная для запуска цикла
+delete_files = config['CONFIG']['delete']      # Если True, то файлы из листа будут удаляться
 start_one = True                # Переменная для отправки первого сообщения
-recon = 5                       # Количество попыток переподключения к серверу
-debug = False                   # Переменная запуска отладки
-delete_files = True             # Если True, то файлы из листа будут удаляться
 myname = socket.gethostname()   # Имя клиента (имя компьютера)
 
 sa = argv[1:]                   # Получение аргументов для запуска скрипта
 
 
 # Папки для удаления
-# Принимает возможности записи ./path/ и D:\\path\\
+# Путь записывается как ./path/
 # Обязательно завершать конец пути
 root_list = ['./test/',
              './test1/',
@@ -51,6 +71,19 @@ if (sa != []):
 
         if (sa[i] == '--recon'):
             recon = int(sa[i+1])
+
+        if (sa[i] == '--rewrite'):
+            config['CONFIG'] = {
+                'server_ip':server_IP,
+                'server_port':server_PORT,
+                'running':running,
+                'recon':recon,
+                'debug':debug,
+                'delete':delete_files
+            }
+
+            with open('client_config.ini', 'w') as configfile:
+                config.write(configfile)
 
         i += 1
 
@@ -136,7 +169,7 @@ while i <= recon:
     sleep(.5)
     i += 1
 
-if (running == False):
+if (running != False):
     print('Подключение к серверу отсутствует')
     isFile(root_list)                           # Удаления файлов в корневом каталоге и во всех подпапках
     if (delete_files):
