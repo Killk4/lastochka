@@ -8,16 +8,17 @@ from time import sleep
 from sys import argv
 
 # Настройки
-server_IP = '10.0.20.200'   # Адрес сервера
-server_PORT = 49999         # Порт сервера
+server_IP = '10.0.20.200'       # Адрес сервера
+server_PORT = 49999             # Порт сервера
 
-running = False             # Переменная для запуска цикла
-start_one = True            # Переменная для отправки первого сообщения
-recon = 5                   # Количество попыток переподключения к серверу
-debug = False               # Переменная запуска отладки
-delete_files = True         # Если True, то файлы из листа будут удаляться
+running = False                 # Переменная для запуска цикла
+start_one = True                # Переменная для отправки первого сообщения
+recon = 5                       # Количество попыток переподключения к серверу
+debug = False                   # Переменная запуска отладки
+delete_files = True             # Если True, то файлы из листа будут удаляться
+myname = socket.gethostname()   # Имя клиента (имя компьютера)
 
-sa = argv[1:]               # Получение аргументов для запуска скрипта
+sa = argv[1:]                   # Получение аргументов для запуска скрипта
 
 
 # Папки для удаления
@@ -47,6 +48,9 @@ if (sa != []):
         # Выключение удаления файлов. Нужно только для отладки, так как файлы по итогу всё равно перезапишутся.
         if (sa[i] == '--nodelete'):
             delete_files = False
+
+        if (sa[i] == '--recon'):
+            recon = int(sa[i+1])
 
         i += 1
 
@@ -111,9 +115,8 @@ def isFile(root_list):
 if (debug):
     debugFolders(1000, 'test')
     debugFolders(100, 'test1')
+    myname = input('Client name: ')
 #######################
-
-myname = input('Client name: ')
 
 # Подключение к серверу
 i = 1
