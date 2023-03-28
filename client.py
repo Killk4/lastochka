@@ -16,38 +16,46 @@ try:
         pass
 except:
     config['CONFIG'] = {
+        'config' : 'config' ,
         'server_ip':'10.0.20.200',
         'server_port':'49999',
-        'running':'True',
+        'running':'False',
         'recon':'5',
         'debug':'False',
         'delete':'True'
     }
 
+    config['DELETE_PATH'] = {
+        'dp' : 'first',
+        'path1' : './test/',
+        'path2' : './test1/',
+        'path3' : 'C:/todel/'
+    }
+
     with open('client_config.ini', 'w') as configfile:
         config.write(configfile)
+
+def toBool(value):
+    '''Принимает текстовое значение'''
+    if (value == 'True'):
+        return True
+    else:
+        return False
 
 # Настройки
 server_IP = config['CONFIG']['server_ip']           # Адрес сервера
 server_PORT = int(config['CONFIG']['server_port'])  # Порт сервера
 
-recon = int(config['CONFIG']['recon'])         # Количество попыток переподключения к серверу
-debug = config['CONFIG']['debug']              # Переменная запуска отладки
-running = config['CONFIG']['running']          # Переменная для запуска цикла
-delete_files = config['CONFIG']['delete']      # Если True, то файлы из листа будут удаляться
+recon = int(config['CONFIG']['recon'])              # Количество попыток переподключения к серверу
+debug = toBool(config['CONFIG']['debug'])           # Переменная запуска отладки
+running = toBool(config['CONFIG']['running'])       # Переменная для запуска цикла
+delete_files = toBool(config['CONFIG']['delete'])   # Если True, то файлы из листа будут удаляться
 start_one = True                # Переменная для отправки первого сообщения
 myname = socket.gethostname()   # Имя клиента (имя компьютера)
 
 sa = argv[1:]                   # Получение аргументов для запуска скрипта
 
-
-# Папки для удаления
-# Путь записывается как ./path/
-# Обязательно завершать конец пути
-root_list = ['./test/',
-             './test1/',
-             'C:/todel/'
-             ]
+root_list = [] # Список удаляемых директорий
 
 # Перебор ключени и работа с ними
 if (sa != []):
@@ -169,11 +177,16 @@ while i <= recon:
     sleep(.5)
     i += 1
 
-if (running != False):
+if (running == False):
     print('Подключение к серверу отсутствует')
-    isFile(root_list)                           # Удаления файлов в корневом каталоге и во всех подпапках
+    for rol in config['DELETE_PATH'].values():
+        if (rol == 'first'):
+            continue
+        root_list.append(rol)
+
+    isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
     if (delete_files):
-        for rl in root_list:                        # Удаление корневого каталога 
+        for rl in root_list:        # Удаление корневого каталога 
             try:
                 shutil.rmtree(rl)
             except:
