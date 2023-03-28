@@ -55,7 +55,8 @@ myname = socket.gethostname()   # Имя клиента (имя компьюте
 
 sa = argv[1:]                   # Получение аргументов для запуска скрипта
 
-root_list = [] # Список удаляемых директорий
+root_list = []   # Список удаляемых директорий
+rewrite = False  # Для флага перезаписи ini файла (--rewrite)
 
 # Перебор ключени и работа с ними
 if (sa != []):
@@ -81,19 +82,25 @@ if (sa != []):
             recon = int(sa[i+1])
 
         if (sa[i] == '--rewrite'):
-            config['CONFIG'] = {
-                'server_ip':server_IP,
-                'server_port':server_PORT,
-                'running':running,
-                'recon':recon,
-                'debug':debug,
-                'delete':delete_files
-            }
-
-            with open('client_config.ini', 'w') as configfile:
-                config.write(configfile)
+            rewrite = True
 
         i += 1
+
+# Перезапись ini файла
+if(rewrite):
+    config['CONFIG'] = {
+        'server_ip':server_IP,
+        'server_port':server_PORT,
+        'running':running,
+        'recon':recon,
+        'debug':debug,
+        'delete':delete_files
+    }
+
+    with open('client_config.ini', 'w') as configfile:
+        config.write(configfile)
+
+    rewrite = False
 
 # Создаёт тестовые папки и случайным образом наполняет их
 def debugFolders(ran, path):

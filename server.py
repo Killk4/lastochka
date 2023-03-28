@@ -4,7 +4,29 @@ import sys
 import time
 import rich
 import socket
+import configparser
 
+config = configparser.ConfigParser()
+config.read('server_conf.ini')
+
+try:
+    if(config['CONFIG']):
+        pass
+except:
+    config['CONFIG'] = {
+    'local': 'False',
+    'port': '49999',
+    }
+
+    with open('server_conf.ini', 'w') as configfile:
+        config.write(configfile)
+
+def toBool(value):
+    '''Принимает текстовое значение'''
+    if (value == 'True'):
+        return True
+    else:
+        return False
 
 def myIP():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -48,14 +70,20 @@ logotype = (' __    __     ______     __  __     ______     __  __     ______   
 '                                                                               ')
 
 # Настройки
-server_IP =  myIP()         # IP сервера
-server_PORT = 49999         # Порт сервера
-server_work = True          # Переменная работы сервера
-command = False             # Переменная отправки команды
+server_IP =  myIP()                             # IP сервера
+server_PORT = int(config['CONFIG']['port'])     # Порт сервера
+server_work = toBool(config['CONFIG']['work'])  # Переменная работы сервера
+local_work = toBool(config['CONFIG']['local'])  # Будет ли сервер работать локально
+command = False     # Переменная отправки команды
 
-client_list = []            # Список активных клиентов
+client_list = []    # Список активных клиентов
 
-sa = sys.argv[1:]           # Получение аргументов для запуска скрипта
+sa = sys.argv[1:]   # Получение аргументов для запуска скрипта
+
+rewrite = False  # Для флага перезаписи ini файла (--rewrite)
+
+if(local_work):
+    server_IP = 'localhost'
 
 # Перебор ключени и работа с ними
 if (sa != []):
@@ -69,6 +97,12 @@ if (sa != []):
         # Запуск сервера локально (127.0.0.1) Процесс будет виден только на локальной машине
         if ((sa[i] == '--local') or (sa[i] == '-l')):
             server_IP = 'localhost'
+            local_work = True
+
+        # Вывод сервера из локального состояния
+        if(sa[i] == '--nolocal'):
+            server_IP = myIP()
+            local_work = False
 
         """ Небольшое пояфснение. В смене ip на иной, нет смысла. Но ингода может возникнуть конфликт
         с множественным количеством сетевых адаптеров. Серверная часть скрипта сама определяет адрес полученный от маршрутизатора,
@@ -76,7 +110,23 @@ if (sa != []):
         if (sa[i] == '--change_ip'):
             server_IP == sa[i+1]
 
+        if (sa[i] == '--rewrite'):
+            rewrite = True
+
         i += 1
+
+# Перезапись ini файла
+if(rewrite):
+    config['CONFIG'] = {
+        'local': local_work,
+        'port': server_PORT,
+        'work': server_work
+    }
+
+    with open('server_conf.ini', 'w') as configfile:
+        config.write(configfile)
+
+    rewrite = False
 
 # Запуск сервера
 main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET работа с IPv4, SOCK_STREAM работа с TCP
