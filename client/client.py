@@ -233,8 +233,8 @@ while running:
 
                 # Если команда дестрой
                 if data[1] == 'destroy':
-                    allDestroy()
                     server.send('mes:preDestroy;'.encode())
+                    allDestroy()
                     server.send('mes:destroy;'.encode())
                     server.close()
 
