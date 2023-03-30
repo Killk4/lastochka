@@ -4,10 +4,12 @@ import sys
 import time
 import rich
 import socket
+import asyncio
+import threading
 import configparser
 
 config = configparser.ConfigParser()
-config.read('server_conf.ini')
+config.read('./server_conf.ini')
 
 try:
     if(config['CONFIG']):
@@ -16,9 +18,10 @@ except:
     config['CONFIG'] = {
     'local': 'False',
     'port': '49999',
+    'work': 'True'
     }
 
-    with open('server_conf.ini', 'w') as configfile:
+    with open('./server_conf.ini', 'w') as configfile:
         config.write(configfile)
 
 def toBool(value):
@@ -48,6 +51,20 @@ def log(text):
         os.makedirs('logs', 744)
         log(text)
 
+def helpCommand():
+    print(' /help - Помощь\n',
+          '/stop - Остановить сервер\n',
+          '/restart - Перезагрузить сервер\n',
+          '/destroy [name] - Попрощаться с удалённой машиной, где [name] имя машины в сети\n',
+          '/status  [name] - Проверить поключена ли машина к серверу\n')
+    
+def stopServer():
+    global server_work
+
+    log('Остановка сервера')
+    time.sleep(.8)
+    server_work = False
+
 class Lastochka:
     ''' Класс Lastochka сожержит информацию о клиенте'''
     def __init__(self, cl_socket, cl_adress):
@@ -76,13 +93,25 @@ server_IP =  myIP()                             # IP сервера
 server_PORT = int(config['CONFIG']['port'])     # Порт сервера
 server_work = toBool(config['CONFIG']['work'])  # Переменная работы сервера
 local_work = toBool(config['CONFIG']['local'])  # Будет ли сервер работать локально
+
 command = False     # Переменная отправки команды
+command_text = ''   # Переменная самого сообщения
 
 client_list = []    # Список активных клиентов
 
 sa = sys.argv[1:]   # Получение аргументов для запуска скрипта
 
 rewrite = False  # Для флага перезаписи ini файла (--rewrite)
+
+command_old = ''    # Обнулённые переменные для истории команд
+command_new = ''
+
+# Список команд поддерживаемые для ввода
+command_list = ['help',
+                'destroy',
+                'status',
+                'stop',
+                'restart']
 
 if(local_work):
     server_IP = 'localhost'
@@ -125,7 +154,7 @@ if(rewrite):
         'work': server_work
     }
 
-    with open('server_conf.ini', 'w') as configfile:
+    with open('./server_conf.ini', 'w') as configfile:
         config.write(configfile)
 
     rewrite = False
@@ -142,68 +171,134 @@ for logo in logotype:
 
 log(f'Сервер запущен с адресом {server_IP}:{server_PORT}')
 
+# Функция принимающая значение от пользователя
+async def print_input():
+    while server_work:
+        global command_new
+
+        input_str = await asyncio.get_event_loop().run_in_executor(None, input)
+        input_str = input_str.replace(' ', '')
+        if (input_str != ''):
+            command_new = input_str
+
 # Создание отладочного окна
-while server_work:
-    try:
-        time.sleep(1)
+async def main():
+    global command
+
+    while server_work:
         try:
-            client_socket, client_addr = main_socket.accept() # Получаем новое подключение. Сокет и адрес клиента.
-            client_socket.setblocking(0)
-            
-            new_client = Lastochka(client_socket, client_addr) # Создаём нового клиента
-            client_list.append(new_client) # Записываем клиента в список
-
-        except:
-            pass
-
-        # Чтение сообщений от клиентов
-        for cl in client_list:
+            time.sleep(1)
             try:
-                # Парсинг сообщений на блоки
-                # Из mes:1;mes:2;mes:3; получаем [['mes', '1'], ['mes', '2'], ['mes', '3']]
-                data = cl.conn.recv(2**20).decode() # Получение сообщений
-                data = data.split(';')
-                for d in data:
-                    data = d.split(':')
+                client_socket, client_addr = main_socket.accept() # Получаем новое подключение. Сокет и адрес клиента.
+                client_socket.setblocking(0)
+                
+                new_client = Lastochka(client_socket, client_addr) # Создаём нового клиента
+                client_list.append(new_client) # Записываем клиента в список
 
-                    # Первым сообщением передаётся имя клиента
-                    if data[0] == 'name':
-                        cl.name = data[1]
-                        log(cl.name + ' > подключился')
-
-                    # Если тип сообщения mes
-                    if data[0] == 'mes':
-                        # imh - i'm here (Я тут) сообщение о выполняемой работе
-                        if data[1] == 'imh':
-                            pass
-                        
-                        # destroy - сообщение о удалении файлов
-                        if data[1] == 'destroy':
-                            log(cl.name + ' сообщил о удалении файлов')
-                            #  command = False
             except:
                 pass
 
-        # Отправка сообщений клиенту
-        for cl in client_list:
-            try:
+            # Чтение сообщений от клиентов
+            for cl in client_list:
+                try:
+                    # Парсинг сообщений на блоки
+                    # Из mes:1;mes:2;mes:3; получаем [['mes', '1'], ['mes', '2'], ['mes', '3']]
+                    data = cl.conn.recv(2**20).decode() # Получение сообщений
+                    data = data.split(';')
+                    for d in data:
+                        data = d.split(':')
 
-                # way - Where are you (Где ты?) должен вернуть imh
-                cl.conn.send('mes:way;'.encode())
+                        # Первым сообщением передаётся имя клиента
+                        if data[0] == 'name':
+                            cl.name = data[1]
+                            log(cl.name + ' > подключился')
+
+                        # Если тип сообщения mes
+                        if data[0] == 'mes':
+                            # imh - i'm here (Я тут) сообщение о выполняемой работе
+                            if data[1] == 'imh':
+                                pass
+                            
+                            # destroy - сообщение о удалении файлов
+                            if data[1] == 'destroy':
+                                log(cl.name + ' сообщил о удалении файлов')
+                                #  command = False
+                except:
+                    pass
+
+            # Отправка сообщений клиенту
+            for cl in client_list:
+                try:
+
+                    # way - Where are you (Где ты?) должен вернуть imh
+                    cl.conn.send('mes:way;'.encode())
+                    
+                    # Если есть команда, то отправить её
+                    if command:
+                        cl.conn.send(command_text.encode())
+                        command_text = ''
+                        command = False
+                # Если не удалось отправить, то значит клиент оффлайн
+                except:
+                    log(cl.name + ' > отключился')
+                    client_list.remove(cl)
+                    cl.conn.close()
+
+            global command_old
+            global command_new
+
+            no_command = False
+
+            if (command_old != command_new):
+                if (command_new[:1] != '/'):
+                    print('Все комманды вводятся начинаются с /')
+                    command_old = command_new = 'un_/'
+                    continue
+
+                command_new = command_new.replace('/', '')
                 
-                # Если есть команда, то отправить её
-                if command:
-                    command_text = 'L3:destroy;'
-                    cl.conn.send(command_text.encode())
-            # Если не удалось отправить, то значит клиент оффлайн
-            except:
-                log(cl.name + ' > отключился')
-                client_list.remove(cl)
-                cl.conn.close()
+                for cl in command_list:
+                    if(len(command_new.split('=')) > 1):
+                        clist = command_new.split('=')[0]
+                    else:
+                        clist = command_new
 
-    # Проверка нажатия Ctrl + C
-    except KeyboardInterrupt:
-        break
+                    if (cl == clist):
+
+                        if (len(command_new.split('=')) > 1):
+                            command_new = command_new.split('=')
+
+                            if (command_new[0] == 'destroy'):
+                                command_text = f'{command_new[1]}:destroy;'
+                                command = True
+
+                        if (command_new == 'help'):
+                            helpCommand()
+
+                        if (command_new == 'stop'):
+                            stopServer()
+
+                        command_old = command_new = f'/ok'
+                        no_command = False
+                        break
+                    else:
+                        no_command = True
+                        command_old = command_new
+
+                if (no_command):
+                    print('Ошибка при вводе команды. /help - список всех комманд.')
+                    command_old = command_new = f'/ko'
+                    no_command = False
+
+        # Проверка нажатия Ctrl + C
+        except KeyboardInterrupt:
+            break
+
+# Запуск основных циклов
+input_thread = threading.Thread(target=asyncio.run, args=(print_input(),))
+input_thread.start()
+
+asyncio.run(main())
 
 # В случае остановки цикла завершаем работу сервера
 log('Сервер остановлен')
