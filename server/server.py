@@ -271,6 +271,7 @@ async def main():
                             if (command_new[0] == 'destroy'):
                                 command_text = f'{command_new[1]}:destroy;'
                                 command = True
+                                log(f'На компьютер {command_new[1]} отправлена команда на удаление')
 
                         if (command_new == 'help'):
                             helpCommand()
@@ -302,5 +303,5 @@ asyncio.run(main())
 
 # В случае остановки цикла завершаем работу сервера
 log('Сервер остановлен')
-time.sleep(5)
+time.sleep(3)
 main_socket.close()
