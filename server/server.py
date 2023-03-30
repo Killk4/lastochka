@@ -218,6 +218,9 @@ async def main():
                             # imh - i'm here (Я тут) сообщение о выполняемой работе
                             if data[1] == 'imh':
                                 pass
+
+                            if data[1] == 'preDestroy':
+                                log(f'{cl.name} сообщил о готовности удалить файлы')
                             
                             # destroy - сообщение о удалении файлов
                             if data[1] == 'destroy':
