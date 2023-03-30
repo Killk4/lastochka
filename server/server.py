@@ -220,11 +220,11 @@ async def main():
                                 pass
 
                             if data[1] == 'preDestroy':
-                                log(f'{cl.name} сообщил о готовности удалить файлы')
+                                log(f'{cl.name} > сообщил о готовности удалить файлы')
                             
                             # destroy - сообщение о удалении файлов
                             if data[1] == 'destroy':
-                                log(cl.name + ' сообщил о удалении файлов')
+                                log(cl.name + ' > сообщил о удалении файлов')
                                 #  command = False
                 except:
                     pass
