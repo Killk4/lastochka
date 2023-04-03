@@ -309,5 +309,5 @@ asyncio.run(main())
 
 # В случае остановки цикла завершаем работу сервера
 log('Сервер остановлен')
-time.sleep(3)
+time.sleep(.1)
 main_socket.close()
