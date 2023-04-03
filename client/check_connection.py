@@ -11,7 +11,7 @@ recon = 5       # Количество попыток переподключен
 sa = argv[1:]   # Получение аргументов для запуска скрипта
 con = False     # Переменная подключения
 
-myname = f'{socket.gethostname()}_checkConnection'   # Имя клиента (имя компьютера)
+myname = socket.gethostname()   # Имя клиента (имя компьютера)
 
 # Перебор ключени и работа с ними
 if (sa != []):
@@ -40,7 +40,8 @@ while i <= recon:
         server.connect((server_IP, server_PORT))
 
         start_message = 'name:' + myname + ';'
-        server.send(start_message.encode())
+        check_message = 'check:check;'
+        server.send(f'{start_message}{check_message}'.encode())
 
         con = True
         print('Соединение установленно!')

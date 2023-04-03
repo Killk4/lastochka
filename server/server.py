@@ -226,6 +226,9 @@ async def main():
                             if data[1] == 'destroy':
                                 log(cl.name + ' > сообщил о удалении файлов')
                                 #  command = False
+
+                        if data[0] == 'check':
+                            log(f'{cl.name} > проверка подключения к серверу')
                 except:
                     pass
 
