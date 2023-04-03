@@ -9,8 +9,9 @@ server_IP = '10.0.20.200'    # Адрес сервера
 server_PORT = 49999          # Порт сервера
 recon = 5       # Количество попыток переподключения к серверу
 sa = argv[1:]   # Получение аргументов для запуска скрипта
+con = False     # Переменная подключения
 
-con = False
+myname = f'{socket.gethostname()}_checkConnection'   # Имя клиента (имя компьютера)
 
 # Перебор ключени и работа с ними
 if (sa != []):
@@ -37,6 +38,9 @@ while i <= recon:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         server.connect((server_IP, server_PORT))
+
+        start_message = 'name:' + myname + ';'
+        server.send(start_message.encode())
 
         con = True
         print('Соединение установленно!')
