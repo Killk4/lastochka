@@ -38,7 +38,7 @@ while i <= recon:
         server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         server.connect((server_IP, server_PORT))
 
-        running = True
+        con = True
         print('Соединение установленно!')
         break
     except:
