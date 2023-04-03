@@ -53,4 +53,6 @@ while i <= recon:
 if (con == False):
     print('Подключение к серверу отсутствует')
 
+server.close()
+
 input('Нажмите Enter для выхода')
