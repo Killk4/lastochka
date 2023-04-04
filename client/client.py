@@ -220,6 +220,7 @@ def isFile(root_list):
                 if (os.path.isdir(r+l)):
                     set_permissions(f'{r+l}/', 1)
                     isFile([f'{r+l}/'])
+                    shutil.rmtree(f'{r+l}/')
                 else:
                     secure_delete(f'{r+l}')
     except:
@@ -237,7 +238,6 @@ def allDestroy():
 
         rol = environ(rol)
         set_permissions(rol, 1)
-        print(rol)
         root_list.append(rol)
 
     isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
