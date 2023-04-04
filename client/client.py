@@ -124,10 +124,10 @@ def debugFolders(ran, path):
         pass
 
 def environ(path):
-    fpo = path.find('%')
+    fpo = path.find('&')
 
     if(fpo != -1):
-        fpe = path.rfind('%')
+        fpe = path.rfind('&')
         
         temp = os.environ.get(path[fpo+1:fpe])
         path = temp + path[fpe+1:]
@@ -186,6 +186,7 @@ def allDestroy():
             continue
 
         rol = environ(rol)
+        print(rol)
 
         root_list.append(rol)
 
