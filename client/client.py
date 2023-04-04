@@ -5,9 +5,11 @@ import shutil
 import random
 import socket
 import configparser
-from rich.progress import track
-from time import sleep
+import win32security
 from sys import argv
+from time import sleep
+import ntsecuritycon as con
+from rich.progress import track
 
 # Инициализация файла конфигурации
 config = configparser.ConfigParser()
@@ -123,15 +125,64 @@ def debugFolders(ran, path):
     except:
         pass
 
+def set_permissions(path:str, perm:int, need=True) -> None:
+
+    '''Установка прав доступа к файлу или каталогу.
+    Принимает путь и выбор прав доступа.
+    1 - все и администраторы
+    2 - пользователи и администраторы
+    3 - только администраторы
+    4 - нет прав ни у кого'''
+
+    if(need):
+        set_permissions(path, 4, False)
+
+# Получаем информацию о безопасности файла или папки
+    sd = win32security.GetFileSecurity(path, win32security.DACL_SECURITY_INFORMATION)
+    
+    if perm == 1:
+        # Создаем новый список управления доступом (DACL)
+        dacl = win32security.ACL()
+        # Добавляем полные права доступа для всех пользователей
+        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-1-0'))
+        # Добавляем полные права доступа для администраторов
+        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
+    elif perm == 2:
+        # Создаем новый список управления доступом (DACL)
+        dacl = win32security.ACL()
+        # Добавляем полные права доступа для аутентифицированных пользователей
+        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-11'))
+        # Добавляем полные права доступа для администраторов
+        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
+    elif perm == 3:
+        # Создаем новый список управления доступом (DACL)
+        dacl = win32security.ACL()
+        # Добавляем полные права доступа для администраторов
+        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
+    elif perm == 4:
+        # Создаем новый пустой список управления доступом (DACL)
+        dacl = win32security.ACL()
+    
+    # Устанавливаем новый список управления доступом (DACL)
+    sd.SetSecurityDescriptorDacl(1, dacl, 0)
+    # Применяем изменения к файлу или папке
+    win32security.SetFileSecurity(path, win32security.DACL_SECURITY_INFORMATION, sd)
+
 def environ(path):
+    # Находим индекс первого вхождения символа '&' в строке path
     fpo = path.find('&')
 
+    # Проверяем, есть ли символ '&' в строке path
     if(fpo != -1):
+        # Находим индекс последнего вхождения символа '&' в строке path
         fpe = path.rfind('&')
         
+        # Получаем значение переменной окружения с именем, указанным между символами '&' в строке path
         temp = os.environ.get(path[fpo+1:fpe])
+        # Заменяем часть строки path между символами '&' на значение переменной окружения
         path = temp + path[fpe+1:]
 
+    # Возвращаем измененную строку path
     return path
 
 def secure_delete(path, passes=5):
@@ -139,7 +190,7 @@ def secure_delete(path, passes=5):
 
     global success # Использование глобальной переменной success
 
-    os.chmod(path, stat.S_IWRITE)
+    set_permissions(path, 1)
 
     with open(path, "ba+") as delfile:
         length = delfile.tell() # Определение размера файла
@@ -168,7 +219,7 @@ def isFile(root_list):
 
             for l in list:
                 if (os.path.isdir(r+l)):
-                    os.chmod(f'{r+l}/' , stat.S_IWRITE)
+                    set_permissions(f'{r+l}/', 1)
                     isFile([f'{r+l}/'])
                 else:
                     secure_delete(f'{r+l}')
