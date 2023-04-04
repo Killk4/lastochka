@@ -9,7 +9,7 @@ import threading
 import configparser
 
 config = configparser.ConfigParser()
-config.read('./server_conf.ini')
+config.read('server_conf.ini')
 
 try:
     if(config['CONFIG']):
@@ -21,7 +21,7 @@ except:
     'work': 'True'
     }
 
-    with open('./server_conf.ini', 'w') as configfile:
+    with open('server_conf.ini', 'w') as configfile:
         config.write(configfile)
 
 def toBool(value):
@@ -153,7 +153,7 @@ if(rewrite):
         'work': server_work
     }
 
-    with open('./server_conf.ini', 'w') as configfile:
+    with open('server_conf.ini', 'w') as configfile:
         config.write(configfile)
 
     rewrite = False
