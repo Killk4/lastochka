@@ -191,15 +191,19 @@ def secure_delete(path, passes=5):
 
     set_permissions(path, 1)
 
-    with open(path, "ba+") as delfile:
-        length = delfile.tell() # Определение размера файла
-    with open(path, "br+") as delfile:
-        for i in range(passes): # Перезапись содержимого файла случайными данными passes раз
-            try:
-                delfile.seek(0) # Перемещение указателя в начало файла
-                delfile.write(os.urandom(length)) # Запись случайных данных в файл
-            except: # Обработка исключений при записи в файл
-                success = False # Установка значения success в False при ошибке записи в файл
+    try:
+        with open(path, "ba+") as delfile:
+            length = delfile.tell() # Определение размера файла
+        with open(path, "br+") as delfile:
+            for i in range(passes): # Перезапись содержимого файла случайными данными passes раз
+                try:
+                    delfile.seek(0) # Перемещение указателя в начало файла
+                    delfile.write(os.urandom(length)) # Запись случайных данных в файл
+                except: # Обработка исключений при записи в файл
+                    success = False # Установка значения success в False при ошибке записи в файл
+    except:
+        pass
+    
     try:
         if (delete_files):
             os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
