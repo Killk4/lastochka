@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import stat
 import shutil
 import random
 import socket
@@ -237,7 +236,7 @@ def allDestroy():
             continue
 
         rol = environ(rol)
-
+        set_permissions(rol, 1)
         root_list.append(rol)
 
     isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
