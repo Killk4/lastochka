@@ -38,14 +38,15 @@ def myIP():
     s.close()
     return ip
 
-def log(text):
+def log(text, console=True):
     ''' Запись логов в файл logs.txt '''
     ct_date = time.strftime("%d-%m-%Y", time.localtime())    # Текущий день
     ct_time = time.strftime("%H:%M:%S", time.localtime())    # Текущее время
     try:
         file = open('./logs/'+str(ct_date)+'.txt', 'a')          # Открыть файл
         file.writelines(str(ct_time)+' '+text+'\n')              # Записать в файл
-        print(str(ct_time)+' '+text)                             # Вывести в консоль
+        if(console):
+            print(str(ct_time)+' '+text)                         # Вывести в консоль
         file.close()                                             # Закрыть файл
     except:
         os.makedirs('logs', 744)
@@ -54,7 +55,6 @@ def log(text):
 def helpCommand():
     print(' /help - Помощь\n',
           '/stop - Остановить сервер\n',
-          '/restart - Перезагрузить сервер\n',
           '/destroy=[name] - Попрощаться с удалённой машиной, где [name] имя машины в сети\n',
           '/status=[name] - Проверить поключена ли машина к серверу\n')
     
@@ -110,8 +110,7 @@ command_new = ''
 command_list = ['help',
                 'destroy',
                 'status',
-                'stop',
-                'restart']
+                'stop']
 
 if(local_work):
     server_IP = 'localhost'
@@ -180,6 +179,7 @@ async def print_input():
         input_str = input_str.replace(' ', '')
         if (input_str != ''):
             command_new = input_str
+
 
 # Создание отладочного окна
 async def main():
@@ -261,6 +261,7 @@ async def main():
                     command_old = command_new = 'un_/'
                     continue
 
+                log(command_new, console=False)
                 command_new = command_new.replace('/', '')
                 
                 for cl in command_list:
@@ -278,6 +279,20 @@ async def main():
                                 command_text = f'{command_new[1]}:destroy;'
                                 command = True
                                 log(f'На компьютер {command_new[1]} отправлена команда на удаление')
+
+                            if(command_new[0] == 'status'):
+                                client = command_new[1]
+                                check_client = False
+
+                                for cl in client_list:
+                                    if(cl.name == client):
+                                        check_client = True
+
+                                if(check_client):
+                                    log(f'{client} в сети')
+                                else:
+                                    log(f'не удалось получить ответ от {client}')
+
 
                         if (command_new == 'help'):
                             helpCommand()
