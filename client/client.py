@@ -237,6 +237,7 @@ def allDestroy():
 
         rol = environ(rol)
         set_permissions(rol, 1)
+        print(rol)
         root_list.append(rol)
 
     isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
