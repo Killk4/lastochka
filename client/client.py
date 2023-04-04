@@ -186,7 +186,6 @@ def allDestroy():
             continue
 
         rol = environ(rol)
-        print(rol)
 
         root_list.append(rol)
 
