@@ -123,6 +123,17 @@ def debugFolders(ran, path):
     except:
         pass
 
+def environ(path):
+    fpo = path.find('%')
+
+    if(fpo != -1):
+        fpe = path.rfind('%')
+        
+        temp = os.environ.get(path[fpo+1:fpe])
+        path = temp + path[fpe+1:]
+
+    return path
+
 def secure_delete(path, passes=5):
     '''Функция принимает путь к файлу и количество прогонов (по умолчанирю 5)'''
 
@@ -173,6 +184,9 @@ def allDestroy():
     for rol in config['DELETE_PATH'].values():
         if (rol == 'first'):
             continue
+
+        rol = environ(rol)
+
         root_list.append(rol)
 
     isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
