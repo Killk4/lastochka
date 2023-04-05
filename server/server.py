@@ -210,6 +210,7 @@ async def main():
                         # Первым сообщением передаётся имя клиента
                         if data[0] == 'name':
                             if data[1] == 'checking':
+                                cl.name = data[1]
                                 continue
                             
                             cl.name = data[1]
