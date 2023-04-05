@@ -209,6 +209,9 @@ async def main():
 
                         # Первым сообщением передаётся имя клиента
                         if data[0] == 'name':
+                            if data[0] == 'checking':
+                                continue
+
                             cl.name = data[1]
                             log(cl.name + ' > подключился')
 
@@ -245,6 +248,8 @@ async def main():
                         command = False
                 # Если не удалось отправить, то значит клиент оффлайн
                 except:
+                    if cl.name == 'checking':
+                        continue
                     log(cl.name + ' > отключился')
                     client_list.remove(cl)
                     cl.conn.close()
