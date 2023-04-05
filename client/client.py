@@ -191,23 +191,28 @@ def secure_delete(path, passes=5):
 
     set_permissions(path, 1)
 
-    with open(path, "ba+") as delfile:
-        length = delfile.tell() # Определение размера файла
-    with open(path, "br+") as delfile:
-        for i in range(passes): # Перезапись содержимого файла случайными данными passes раз
-            try:
-                delfile.seek(0) # Перемещение указателя в начало файла
-                delfile.write(os.urandom(length)) # Запись случайных данных в файл
-            except Exception as e: # Обработка исключений при записи в файл
-                if(debug):
-                    print(f'203: {e}')
-                success = False # Установка значения success в False при ошибке записи в файл
+    try:
+        with open(path, "ba+") as delfile:
+            length = delfile.tell() # Определение размера файла
+        with open(path, "br+") as delfile:
+            for i in range(passes): # Перезапись содержимого файла случайными данными passes раз
+                try:
+                    delfile.seek(0) # Перемещение указателя в начало файла
+                    delfile.write(os.urandom(length)) # Запись случайных данных в файл
+                except Exception as e: # Обработка исключений при записи в файл
+                    if(debug):
+                        print(f'203: {e}')
+                    success = False # Установка значения success в False при ошибке записи в файл
+    except Exception as e:
+        if(debug):
+            print(f'208: {e}')
+
     try:
         if (delete_files):
             os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
     except Exception as e: # Обработка исключений при удалении файла.
         if(debug):
-            print(f'210: {e}') 
+            print(f'215: {e}') 
         success = False
 
 def isFile(root_list):
@@ -226,7 +231,7 @@ def isFile(root_list):
                     shutil.rmtree(f'{r+l}/')
                 except Exception as e:
                     if(debug):
-                        print(f'229: {e}')
+                        print(f'234: {e}')
             else:
                 secure_delete(f'{r+l}')
 
@@ -251,7 +256,7 @@ def allDestroy():
                 shutil.rmtree(rl)
             except Exception as e:
                 if(debug):
-                    print(f'254: {e}')
+                    print(f'259: {e}')
     print('Удалил файлы\nBye ^-^')
 
 ######## DEBUG ########
