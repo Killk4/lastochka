@@ -211,9 +211,9 @@ async def main():
                         if data[0] == 'name':
                             if data[0] == 'checking':
                                 continue
-
-                            cl.name = data[1]
-                            log(cl.name + ' > подключился')
+                            else:
+                                cl.name = data[1]
+                                log(cl.name + ' > подключился')
 
                         # Если тип сообщения mes
                         if data[0] == 'mes':
@@ -250,9 +250,10 @@ async def main():
                 except:
                     if cl.name == 'checking':
                         continue
-                    log(cl.name + ' > отключился')
-                    client_list.remove(cl)
-                    cl.conn.close()
+                    else:
+                        log(cl.name + ' > отключился')
+                        client_list.remove(cl)
+                        cl.conn.close()
 
             global command_old
             global command_new
