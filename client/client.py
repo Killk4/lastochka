@@ -225,6 +225,7 @@ def isFile(root_list):
     Если нет файлов, но есть папка, тогда вызывается рекурсия на подпапку.'''
 
     for r in root_list:
+        set_permissions(r, 1)
         list = os.listdir(r)
 
         for l in list:
