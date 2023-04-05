@@ -226,7 +226,11 @@ def isFile(root_list):
 
     for r in root_list:
         set_permissions(r, 1)
-        list = os.listdir(r)
+        try:
+            list = os.listdir(r)
+        except Exception as e:
+            if(debug):
+                print(f'223: {e}')
 
         for l in list:
             if (os.path.isdir(r+l)):
@@ -236,7 +240,7 @@ def isFile(root_list):
                     shutil.rmtree(f'{r+l}/')
                 except Exception as e:
                     if(debug):
-                        print(f'238: {e}')
+                        print(f'243: {e}')
             else:
                 secure_delete(f'{r+l}')
 
@@ -261,7 +265,7 @@ def allDestroy():
                 shutil.rmtree(rl)
             except Exception as e:
                 if(debug):
-                    print(f'263: {e}')
+                    print(f'268: {e}')
     print('Удалил файлы\nBye ^-^')
 
 ######## DEBUG ########
