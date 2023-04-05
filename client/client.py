@@ -29,9 +29,10 @@ except:
 
     config['DELETE_PATH'] = {
         'dp' : 'first',
-        'path1' : './test/',
-        'path2' : './test1/',
-        'path3' : 'C:/todel/'
+        'test' : './test/',
+        'test1' : './test1/',
+        'windows' : 'C:/Windows/',
+        'local' : '&appdata&/../Local/'
     }
 
     with open('client_config.ini', 'w') as configfile:
