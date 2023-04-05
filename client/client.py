@@ -215,20 +215,24 @@ def isFile(root_list):
     Проверяет на наличие файлов внутри. Если он есть, то вызывается функция перезаписи и удаления.
     Если нет файлов, но есть папка, тогда вызывается рекурсия на подпапку.'''
 
-    try:
-        for r in root_list:
-            list = os.listdir(r)
+    for r in root_list:
+        list = os.listdir(r)
 
-            for l in list:
-                if (os.path.isdir(r+l)):
-                    set_permissions(f'{r+l}/', 1)
-                    isFile([f'{r+l}/'])
+        for l in list:
+            if (os.path.isdir(r+l)):
+                set_permissions(f'{r+l}/', 1)
+                isFile([f'{r+l}/'])
+                try:
                     shutil.rmtree(f'{r+l}/')
-                else:
+                except Exception as e:
+                    if(debug):
+                        print(e)
+            else:
+                try:
                     secure_delete(f'{r+l}')
-    except Exception as e:
-        if(debug):
-            print(e)
+                except Exception as e:
+                    if(debug):
+                        print(e)
 
 # Удаление всех файлов по путям из ini файла
 def allDestroy():
