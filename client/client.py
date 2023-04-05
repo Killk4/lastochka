@@ -200,14 +200,14 @@ def secure_delete(path, passes=5):
                 delfile.write(os.urandom(length)) # Запись случайных данных в файл
             except Exception as e: # Обработка исключений при записи в файл
                 if(debug):
-                    print(e)
+                    print(f'203: {e}')
                 success = False # Установка значения success в False при ошибке записи в файл
     try:
         if (delete_files):
             os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
     except Exception as e: # Обработка исключений при удалении файла.
         if(debug):
-            print(e) 
+            print(f'210: {e}') 
         success = False
 
 def isFile(root_list):
@@ -226,13 +226,9 @@ def isFile(root_list):
                     shutil.rmtree(f'{r+l}/')
                 except Exception as e:
                     if(debug):
-                        print(e)
+                        print(f'229: {e}')
             else:
-                try:
-                    secure_delete(f'{r+l}')
-                except Exception as e:
-                    if(debug):
-                        print(e)
+                secure_delete(f'{r+l}')
 
 # Удаление всех файлов по путям из ini файла
 def allDestroy():
@@ -255,7 +251,7 @@ def allDestroy():
                 shutil.rmtree(rl)
             except Exception as e:
                 if(debug):
-                    print(e)
+                    print(f'254: {e}')
     print('Удалил файлы\nBye ^-^')
 
 ######## DEBUG ########
