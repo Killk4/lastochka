@@ -209,11 +209,11 @@ async def main():
 
                         # Первым сообщением передаётся имя клиента
                         if data[0] == 'name':
-                            if data[0] == 'checking':
+                            if data[1] == 'checking':
                                 continue
-                            else:
-                                cl.name = data[1]
-                                log(cl.name + ' > подключился')
+                            
+                            cl.name = data[1]
+                            log(cl.name + ' > подключился')
 
                         # Если тип сообщения mes
                         if data[0] == 'mes':
@@ -250,10 +250,10 @@ async def main():
                 except:
                     if cl.name == 'checking':
                         continue
-                    else:
-                        log(cl.name + ' > отключился')
-                        client_list.remove(cl)
-                        cl.conn.close()
+                
+                    log(cl.name + ' > отключился')
+                    client_list.remove(cl)
+                    cl.conn.close()
 
             global command_old
             global command_new
