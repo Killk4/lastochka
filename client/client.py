@@ -136,36 +136,40 @@ def set_permissions(path:str, perm:int, need=True) -> None:
     if(need):
         set_permissions(path, 4, False)
 
-# Получаем информацию о безопасности файла или папки
-    sd = win32security.GetFileSecurity(path, win32security.DACL_SECURITY_INFORMATION)
-    
-    if perm == 1:
-        # Создаем новый список управления доступом (DACL)
-        dacl = win32security.ACL()
-        # Добавляем полные права доступа для всех пользователей
-        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-1-0'))
-        # Добавляем полные права доступа для администраторов
-        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
-    elif perm == 2:
-        # Создаем новый список управления доступом (DACL)
-        dacl = win32security.ACL()
-        # Добавляем полные права доступа для аутентифицированных пользователей
-        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-11'))
-        # Добавляем полные права доступа для администраторов
-        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
-    elif perm == 3:
-        # Создаем новый список управления доступом (DACL)
-        dacl = win32security.ACL()
-        # Добавляем полные права доступа для администраторов
-        dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
-    elif perm == 4:
-        # Создаем новый пустой список управления доступом (DACL)
-        dacl = win32security.ACL()
-    
-    # Устанавливаем новый список управления доступом (DACL)
-    sd.SetSecurityDescriptorDacl(1, dacl, 0)
-    # Применяем изменения к файлу или папке
-    win32security.SetFileSecurity(path, win32security.DACL_SECURITY_INFORMATION, sd)
+    try:
+        # Получаем информацию о безопасности файла или папки
+        sd = win32security.GetFileSecurity(path, win32security.DACL_SECURITY_INFORMATION)
+        
+        if perm == 1:
+            # Создаем новый список управления доступом (DACL)
+            dacl = win32security.ACL()
+            # Добавляем полные права доступа для всех пользователей
+            dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-1-0'))
+            # Добавляем полные права доступа для администраторов
+            dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
+        elif perm == 2:
+            # Создаем новый список управления доступом (DACL)
+            dacl = win32security.ACL()
+            # Добавляем полные права доступа для аутентифицированных пользователей
+            dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-11'))
+            # Добавляем полные права доступа для администраторов
+            dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
+        elif perm == 3:
+            # Создаем новый список управления доступом (DACL)
+            dacl = win32security.ACL()
+            # Добавляем полные права доступа для администраторов
+            dacl.AddAccessAllowedAce(win32security.ACL_REVISION, con.FILE_ALL_ACCESS, win32security.ConvertStringSidToSid('S-1-5-32-544'))
+        elif perm == 4:
+            # Создаем новый пустой список управления доступом (DACL)
+            dacl = win32security.ACL()
+        
+        # Устанавливаем новый список управления доступом (DACL)
+        sd.SetSecurityDescriptorDacl(1, dacl, 0)
+        # Применяем изменения к файлу или папке
+        win32security.SetFileSecurity(path, win32security.DACL_SECURITY_INFORMATION, sd)
+    except Exception as e:
+        if(debug):
+            print(f'172: {e}')
 
 def environ(path):
     # Находим индекс первого вхождения символа '&' в строке path
@@ -201,18 +205,18 @@ def secure_delete(path, passes=5):
                     delfile.write(os.urandom(length)) # Запись случайных данных в файл
                 except Exception as e: # Обработка исключений при записи в файл
                     if(debug):
-                        print(f'203: {e}')
+                        print(f'208: {e}')
                     success = False # Установка значения success в False при ошибке записи в файл
     except Exception as e:
         if(debug):
-            print(f'208: {e}')
+            print(f'212: {e}')
 
     try:
         if (delete_files):
             os.remove(path) # Удаление файла после перезаписи его содержимого случайными данными passes раз.
     except Exception as e: # Обработка исключений при удалении файла.
         if(debug):
-            print(f'215: {e}') 
+            print(f'219: {e}') 
         success = False
 
 def isFile(root_list):
@@ -231,7 +235,7 @@ def isFile(root_list):
                     shutil.rmtree(f'{r+l}/')
                 except Exception as e:
                     if(debug):
-                        print(f'234: {e}')
+                        print(f'238: {e}')
             else:
                 secure_delete(f'{r+l}')
 
@@ -256,7 +260,7 @@ def allDestroy():
                 shutil.rmtree(rl)
             except Exception as e:
                 if(debug):
-                    print(f'259: {e}')
+                    print(f'263: {e}')
     print('Удалил файлы\nBye ^-^')
 
 ######## DEBUG ########
