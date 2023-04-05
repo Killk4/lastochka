@@ -233,16 +233,20 @@ def isFile(root_list):
                 print(f'223: {e}')
 
         for l in list:
-            if (os.path.isdir(r+l)):
-                set_permissions(f'{r+l}/', 1)
-                isFile([f'{r+l}/'])
-                try:
-                    shutil.rmtree(f'{r+l}/')
-                except Exception as e:
-                    if(debug):
-                        print(f'243: {e}')
-            else:
-                secure_delete(f'{r+l}')
+            try:
+                if (os.path.isdir(r+l)):
+                    set_permissions(f'{r+l}/', 1)
+                    isFile([f'{r+l}/'])
+                    try:
+                        shutil.rmtree(f'{r+l}/')
+                    except Exception as e:
+                        if(debug):
+                            print(f'243: {e}')
+                else:
+                    secure_delete(f'{r+l}')
+            except Exception as e:
+                if(debug):
+                    print(f'249: {e}')
 
 # Удаление всех файлов по путям из ini файла
 def allDestroy():
@@ -265,7 +269,7 @@ def allDestroy():
                 shutil.rmtree(rl)
             except Exception as e:
                 if(debug):
-                    print(f'268: {e}')
+                    print(f'272: {e}')
     print('Удалил файлы\nBye ^-^')
 
 ######## DEBUG ########
