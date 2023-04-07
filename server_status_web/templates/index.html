@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Status</title>
+</head>
+<body>
+    <h1>Server Status</h1>
+    {% if server_status %}
+        <div style="float: left; width: 15px; height: 15px; border-radius: 50%; background-color: green;"></div>
+    {% else %}
+        <div style="float: left; width: 15px; height: 15px; border-radius: 50%; background-color: red;"></div>
+    {% endif %}
+    <p style="margin-left: 15px;">{{ server_name }}</p>
+</body>
+</html>
