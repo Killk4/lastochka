@@ -258,11 +258,12 @@ def allDestroy():
     for rol in config['DELETE_PATH'].values():
         if (rol == 'first'):
             continue
-
-        rol = environ(rol)
-        set_permissions(rol, 1)
-        root_list.append(rol)
-
+        
+        if(os.path.isdir):
+            rol = environ(rol)
+            set_permissions(rol, 1)
+            root_list.append(rol)
+            
     isFile(root_list)               # Удаления файлов в корневом каталоге и во всех подпапках
     if (delete_files):
         for rl in root_list:        # Удаление корневого каталога 
