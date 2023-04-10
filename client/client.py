@@ -259,7 +259,7 @@ def allDestroy():
         if (rol == 'first'):
             continue
         
-        if(os.path.isdir):
+        if(os.path.isdir(rol)):
             rol = environ(rol)
             set_permissions(rol, 1)
             root_list.append(rol)
