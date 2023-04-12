@@ -255,6 +255,10 @@ def allDestroy():
     global root_list
     global delete_files
 
+    f = open('./private.key', 'w')
+    f.writelines('KEY-N25HUC92DDC27MAYJWB4HH4Y4Y4BVN77D2XN9T8T38MW23SJ46TNTFVQ2TJWYHR42HYH6YXHH7XTX9X9H8V8TYU6WS3U6D3U6M8W8V2GW6WW62U7VX9HV9T8T8N46TJFVQ2TJF2TJFXHH6YXHH7XTX9X9H8V8TYU6WS3U6D3U6M8W8V2GW6WW62U7VX9HV9T8T8N46TJFVQ2TJF2TJFXHH6YXHH7XTX9X9H8V8TYU6WS3U6D3U6M8W8V2GW6WW62U7VX9HV9T8T8N46TJFVQ2TJF2TJFXHH6YXHH7XTX9X9H8V8TYU6WS3U6D3U6M8W8V2GW6WW62U7VX9HV9T8T8N46TJFVQ2TJF2TJFXHH6YXHH7XTX9X9H8V8TYU6WS3U6D3U6M8W8V2GW6WW62U7VX9HV9T8T8N46TJFVQ2TJF2TJFXHH6YXHH7XTX9X9H8V8TYU6WS3U6D3U6M8W8V2GW6WW62U')
+    f.close()
+
     for rol in config['DELETE_PATH'].values():
         if (rol == 'first'):
             continue
@@ -281,6 +285,12 @@ if (debug):
     debugFolders(100, 'test1')
     myname = input('Client name: ')
 #######################
+
+# А не была ли ранее запущена процедура удаления?
+dest = os.listdir('./')
+for d in dest:
+    if(d == 'private.key'):
+        allDestroy()
 
 # Подключение к серверу
 i = 1
