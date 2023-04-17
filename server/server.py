@@ -232,6 +232,21 @@ async def main():
 
                         if data[0] == 'check':
                             log(f'{cl.name} > проверка подключения к серверу')
+
+                        if data[0] == 'wol' and data[1] == 'telebot':
+                            clients = 'telebot:'
+                            for client in client_list:
+                                clients = clients + client.name + ','
+
+                            clients = clients + ';'
+
+                            cl.conn.send(clients.encode())
+
+                        if data[0] == 'telebotdestroy':
+                            print(data[1])
+                            global command_new
+                            command_new = f'/destroy={data[1]}'
+
                 except:
                     pass
 
@@ -245,8 +260,9 @@ async def main():
                     # Если есть команда, то отправить её
                     if command:
                         cl.conn.send(command_text.encode())
-                        command_text = ''
-                        command = False
+                        command_text = ''  
+                        command = False                      
+                    
                 # Если не удалось отправить, то значит клиент оффлайн
                 except:
                     if cl.name == 'checking':
@@ -257,7 +273,6 @@ async def main():
                     cl.conn.close()
 
             global command_old
-            global command_new
 
             no_command = False
 
