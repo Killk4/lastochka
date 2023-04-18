@@ -3,7 +3,7 @@ import socket
 import telebot
 import sqlite3
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('6163267213:AAHU6vh2OUCT3eYbLF-7pru93zFPvP2C78g')
 
 admins = []
 
@@ -11,6 +11,8 @@ server_IP = '10.0.5.200'
 server_PORT = 49999
 
 def newAdmin(name: str, nick: str, chatid: str) -> None:
+    ''' Функция для подачи заявки в администраторы
+    Принимает Имя, Ник и chatid тележки.'''
     database = sqlite3.connect('telegram.db')
     count_ta = database.cursor()
     cursor = database.cursor()
@@ -27,6 +29,7 @@ def newAdmin(name: str, nick: str, chatid: str) -> None:
     database.close()
 
 def allAdmins() -> None:
+    '''Функция переписывает массив с chatid администраторов бота для дальнейшей идентификации'''
     database = sqlite3.connect('telegram.db')
     cursor = database.cursor()
     cursor.execute("SELECT * from admins")
@@ -36,6 +39,7 @@ def allAdmins() -> None:
     database.close()
 
 def TempAdminList(chatid) -> None:
+    '''Функция выбирает всех админов из темпа и выводит список для решения'''
     buttons = []
     tempAdmin = ''
     database = sqlite3.connect('telegram.db')
@@ -54,6 +58,7 @@ def TempAdminList(chatid) -> None:
 
 
 def AdminAllow(id, chatid) -> None:
+    '''Функция одобрения нового администратора'''
     database = sqlite3.connect('telegram.db')
     add_admin = database.cursor()
     del_admin = database.cursor()
@@ -70,6 +75,7 @@ def AdminAllow(id, chatid) -> None:
     allAdmins()
 
 def AdminDeny(id, chatid) -> None:
+    '''Функция отказа в привелегии администратора'''
     database = sqlite3.connect('telegram.db')
     cursor = database.cursor()
     cursor.execute(f'DELETE FROM adminTemp WHERE id={id}')
@@ -78,6 +84,7 @@ def AdminDeny(id, chatid) -> None:
     bot.send_message(chatid, 'Вам не было одобрено стать администратором системы!')
 
 def DestroyKeyboard(chatid, client):
+    '''Функция выводит сообщение перед устранением клиентской машины'''
     buttons = []
 
     buttons.append(telebot.types.InlineKeyboardButton(text=f'Да', callback_data=f'DESTROY:yes:{client}'))
@@ -88,6 +95,7 @@ def DestroyKeyboard(chatid, client):
     bot.send_message(chatid, f'Вы уверены что хотите уничтожить {client}?', reply_markup=keyboard)
 
 def Destroy(client):
+    '''Функция отправляет на сервер команду на ликвидацию клиента'''
     try:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -100,7 +108,7 @@ def Destroy(client):
         print(e)
 
 def WhoOnLine(chatid):
-
+    '''Отправляет на сервер запрос и получает ответ со списком клиентов в сети'''
     onlines = ''
 
     try:
@@ -142,7 +150,7 @@ def WhoOnLine(chatid):
 
 allAdmins() 
 
-@bot.message_handler(commands=['start', 'help', 'opme', 'list', 'destroy', 'temps'])
+@bot.message_handler(commands=['start', 'opme', 'list', 'temps'])
 def handle_command(message):
     text = message.text
 
@@ -163,6 +171,9 @@ def handle_command(message):
 
         if('/temps' in text):
             TempAdminList(message.chat.id)
+    else:
+        # Команды которые могут выполнить только не авторизованные
+        pass
 
 # Клавиатура списка клиентов
 @bot.callback_query_handler(func=lambda call: call.data.startswith('DANGER:'))
