@@ -136,7 +136,7 @@ def WhoOnLine(chatid):
                     button = telebot.types.InlineKeyboardButton(text=f'Уничтожить {client}', callback_data=f'DANGER:{client}')
                     buttons.append(button)
 
-                button = telebot.types.InlineKeyboardButton(text='Скрыть клавиатуру', callback_data='DANGER:hide:keyboard')
+                button = telebot.types.InlineKeyboardButton(text='Скрыть клавиатуру', callback_data='DANGER:hidekeyboard')
                 buttons.append(button)
                 keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
                 keyboard.add(*list(buttons))
