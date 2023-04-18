@@ -6,6 +6,7 @@ import sqlite3
 bot = telebot.TeleBot('6163267213:AAHU6vh2OUCT3eYbLF-7pru93zFPvP2C78g')
 
 admins = []
+client_list = ['telebot', 'checking', '']
 
 server_IP = '10.0.5.200'
 server_PORT = 49999
@@ -125,12 +126,12 @@ def WhoOnLine(chatid):
 
         for d in data:
             da = d.split(':')
-            if da[0] == 'telebot' or da[0] == 'checking':
+            if da[0] == 'telebot':
                 clients = da[1].split(',')
                 
                 buttons = []
                 for client in clients:
-                    if client == 'telebot' or client == '':
+                    if client in client_list:
                         continue
                     onlines = onlines + f'{client}\n'
                     button = telebot.types.InlineKeyboardButton(text=f'Уничтожить {client}', callback_data=f'DANGER:{client}')
