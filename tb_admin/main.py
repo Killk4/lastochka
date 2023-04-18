@@ -125,7 +125,7 @@ def WhoOnLine(chatid):
 
         for d in data:
             da = d.split(':')
-            if da[0] == 'telebot':
+            if da[0] == 'telebot' or da[0] == 'checking':
                 clients = da[1].split(',')
                 
                 buttons = []
