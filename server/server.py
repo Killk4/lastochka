@@ -4,6 +4,7 @@ import sys
 import time
 import socket
 import asyncio
+import sqlite3
 import threading
 import configparser
 
@@ -37,7 +38,7 @@ def myIP():
     s.close()
     return ip
 
-def log(text, console=True):
+def log(text, console=True, event: int = 0, event_client: str = 'None'):
     ''' Запись логов в файл logs.txt '''
     ct_date = time.strftime("%d-%m-%Y", time.localtime())    # Текущий день
     ct_time = time.strftime("%H:%M:%S", time.localtime())    # Текущее время
@@ -50,6 +51,13 @@ def log(text, console=True):
     except:
         os.makedirs('logs', 744)
         log(text)
+
+    if(event != 0):
+        database = sqlite3.connect('main.db')
+        cursor = database.cursor()
+        cursor.execute(f'INSERT INTO logs (event, client, logtime) SELECT {event}, id, {int(time.time())} FROM swallows WHERE name = "{event_client}"')
+        database.commit()
+        database.close()
 
 def helpCommand():
     print(' /help - Помощь\n',
@@ -64,6 +72,71 @@ def stopServer():
     time.sleep(.8)
     server_work = False
 
+# Работа с БД
+def findSwallowForBase(name: str) -> bool:
+    '''Проверяет существование записи клиента в базе.
+    Возвращает True если клиент найден'''
+    database = sqlite3.connect('main.db')
+    cursor = database.cursor()
+    cursor.execute(f'SELECT * FROM `swallows` WHERE name = "{name}"')
+    count = len(cursor.fetchall())
+    database.close()
+
+    if(count > 0):
+        return True
+    
+    return False
+
+def newSwallowForBase(name: str, hash: str = None) -> bool:
+    '''Создаёт новую запись о клиенте.
+    Возвращает True если запись созданна успешно'''
+    ret = False
+    database = sqlite3.connect('main.db')
+    cursor = database.cursor()
+    if(hash == None):
+        hash = 'NULL'
+    try:
+        cursor.execute(f'INSERT INTO swallows ("name", "hash") VALUES ("{name}", "{hash}")')
+        database.commit()
+        ret = True
+    except:
+        pass
+    finally:
+        database.close()
+        return ret
+
+def swaalowsList() -> list:
+    swallows = []
+    database = sqlite3.connect('main.db')
+    cursor = database.cursor()
+    cursor.execute('SELECT * FROM swallows WHERE status = 1')
+    rows = cursor.fetchall()
+    for row in rows:
+        swallows.append((row[1], row[3]))
+    database.close()
+    return swallows
+
+def destroyTask(client: str) -> str:
+    database = sqlite3.connect('main.db')
+    check = database.cursor()
+    cursor = database.cursor()
+
+    check.execute(f'SELECT * FROM destroy_task WHERE client = (SELECT id FROM swallows WHERE name = "{client}")')
+    if(len(check.fetchall()) < 1):
+        cursor.execute(f'INSERT INTO destroy_task ("client") SELECT id FROM swallows WHERE name = "{client}"')
+        database.commit()
+        database.close()
+        return f'Задание на устранение {client} запланировано'
+    else:
+        database.close()
+        return f'Задание на устранение {client} уже существует'
+
+def cancelDestroyTask(client: str) -> None:
+    database = sqlite3.connect('main.db')
+    cursor = database.cursor()
+    cursor.execute(f'DELETE FROM destroy_task WHERE client = (SELECT id FROM swallows WHERE name = "{client}")')
+    database.commit()
+    database.close()
 class Lastochka:
     ''' Класс Lastochka сожержит информацию о клиенте'''
     def __init__(self, cl_socket, cl_adress):
@@ -167,7 +240,7 @@ main_socket.listen(5) # Включение прослушки порта. 5 го
 for logo in logotype:
     print(logo)
 
-log(f'Сервер запущен с адресом {server_IP}:{server_PORT}')
+log(f'Сервер запущен с адресом {server_IP}:{server_PORT}', event=5, event_client='SERVER')
 
 # Функция принимающая значение от пользователя
 async def print_input():
@@ -213,8 +286,15 @@ async def main():
                                 cl.name = data[1]
                                 continue
                             
-                            cl.name = data[1]
-                            log(cl.name + ' > подключился')
+                            cl.name = data[1]                            
+
+                            # Если ласточка ещё не существует в базе, то создать, а если существует, то проверить отложенные задания
+                            if(findSwallowForBase(cl.name)):
+                                pass # Здесь будет проверка отложенных задач
+                            else:
+                                newSwallowForBase(cl.name)
+
+                            log(f'{cl.name} > подключился',event=1, event_client=cl.name)
 
                         # Если тип сообщения mes
                         if data[0] == 'mes':
@@ -223,15 +303,15 @@ async def main():
                                 pass
 
                             if data[1] == 'preDestroy':
-                                log(f'{cl.name} > сообщил о начале удаления файлов')
+                                log(f'{cl.name} > сообщил о начале удаления файлов', event=3, event_client=cl.name)
                             
                             # destroy - сообщение о удалении файлов
                             if data[1] == 'destroy':
-                                log(cl.name + ' > сообщил о завершении удаления файлов')
+                                log(cl.name + ' > сообщил о завершении удаления файлов', event=4, event_client=cl.name)
                                 #  command = False
 
                         if data[0] == 'check':
-                            log(f'{cl.name} > проверка подключения к серверу')
+                            log(f'{cl.name} > проверка подключения к серверу', event=7, event_client=cl.name)
 
                         if data[0] == 'wol' and data[1] == 'telebot':
                             clients = 'telebot:'
@@ -268,7 +348,7 @@ async def main():
                     if cl.name == 'checking':
                         continue
                 
-                    log(cl.name + ' > отключился')
+                    log(cl.name + ' > отключился', event=2, event_client=cl.name)
                     client_list.remove(cl)
                     cl.conn.close()
 
@@ -344,6 +424,6 @@ input_thread.start()
 asyncio.run(main())
 
 # В случае остановки цикла завершаем работу сервера
-log('Сервер остановлен')
+log('Сервер остановлен', event=6, event_client='SERVER')
 time.sleep(.1)
 main_socket.close()
