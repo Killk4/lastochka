@@ -3,12 +3,12 @@ import socket
 import telebot
 import sqlite3
 
-bot = telebot.TeleBot('6163267213:AAHU6vh2OUCT3eYbLF-7pru93zFPvP2C78g')
+bot = telebot.TeleBot('5849070562:AAFVcB_xCKwu2NA6x8xJg45SHHyq0PHKlqk')
 
 admins = []
 client_list = ['telebot', 'checking', '']
 
-server_IP = '10.0.5.200'
+server_IP = '10.10.8.122'
 server_PORT = 49999
 
 def newAdmin(name: str, nick: str, chatid: str) -> None:
@@ -95,7 +95,7 @@ def DestroyKeyboard(chatid, client):
 
     bot.send_message(chatid, f'Вы уверены что хотите уничтожить {client}?', reply_markup=keyboard)
 
-def Destroy(client):
+def Destroy(client, chatid):
     '''Функция отправляет на сервер команду на ликвидацию клиента'''
     try:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -105,11 +105,15 @@ def Destroy(client):
         start_message = 'name:telebot;'
         destroy_message = f'telebotdestroy:{client};'
         server.send(f'{start_message}{destroy_message}'.encode())
+        bot.send_message(chatid, server.recv(2**20).decode())
     except Exception as e:
         print(e)
 
-def WhoOnLine(chatid):
-    '''Отправляет на сервер запрос и получает ответ со списком клиентов в сети'''
+def getList(chatid, message):
+    '''Отправляет на сервер запрос и получает ответ со списком клиентов
+    wol - кто в сети?
+    alc - полный список клиентов'''
+
     onlines = ''
 
     try:
@@ -118,7 +122,7 @@ def WhoOnLine(chatid):
         server.connect((server_IP, server_PORT))
 
         start_message = 'name:telebot;'
-        wol_message = 'wol:telebot;'        # wol - who online
+        wol_message = f'{message}:telebot;'        # wol - who online
         server.send(f'{start_message}{wol_message}'.encode())
 
         data = server.recv(2**20).decode();
@@ -143,15 +147,13 @@ def WhoOnLine(chatid):
                 keyboard.add(*list(buttons))
 
         bot.send_message(chatid, f'Список клиентов в сети:\n{onlines}', reply_markup=keyboard)
-
-
     except Exception as e:
         print(e)
         bot.send_message(chatid, 'Сервер недоступен!')
 
 allAdmins() 
 
-@bot.message_handler(commands=['start', 'opme', 'list', 'temps'])
+@bot.message_handler(commands=['start', 'opme', 'list', 'temps', 'plan', 'cancel'])
 def handle_command(message):
     text = message.text
 
@@ -168,10 +170,16 @@ def handle_command(message):
             bot.send_message(message.chat.id, ':)')
 
         if('/list' in text):
-            WhoOnLine(message.chat.id)
+            getList(message.chat.id, 'wol')
 
         if('/temps' in text):
             TempAdminList(message.chat.id)
+
+        if('/plan' in text):
+            getList(message.chat.id, 'alc')
+
+        if('/cancel' in text):
+            pass
     else:
         # Команды которые могут выполнить только не авторизованные
         pass
@@ -194,8 +202,8 @@ def on_danger_button_clicked(call):
     client = call.data.split(':')[2] # получаем имя клиента из callback_data
 
     if(choice == 'yes'):
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=f"{client} уничтожен!")
-        Destroy(client)
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=f"Создано задание на уничтожение {client}!")
+        Destroy(client, call.message.chat.id)
     if(choice == 'no'):
         bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
 

@@ -112,7 +112,7 @@ def swaalowsList() -> list:
     cursor.execute('SELECT * FROM swallows WHERE status = 1')
     rows = cursor.fetchall()
     for row in rows:
-        swallows.append((row[1], row[3]))
+        swallows.append(row[1])
     database.close()
     return swallows
 
@@ -126,10 +126,10 @@ def destroyTask(client: str) -> str:
         cursor.execute(f'INSERT INTO destroy_task ("client") SELECT id FROM swallows WHERE name = "{client}"')
         database.commit()
         database.close()
-        return f'Задание на устранение {client} запланировано'
+        return True, f'Задание на устранение {client} запланировано'
     else:
         database.close()
-        return f'Задание на устранение {client} уже существует'
+        return False, f'Задание на устранение {client} уже существует'
 
 def cancelDestroyTask(client: str) -> None:
     database = sqlite3.connect('main.db')
@@ -137,6 +137,15 @@ def cancelDestroyTask(client: str) -> None:
     cursor.execute(f'DELETE FROM destroy_task WHERE client = (SELECT id FROM swallows WHERE name = "{client}")')
     database.commit()
     database.close()
+
+def selectAllWaitingDestroy() -> list:
+    database = sqlite3.connect('main.db')
+    cursor = database.cursor()
+    cursor.execute('SELECT dt.*, s.name AS name FROM destroy_task AS dt JOIN swallows AS s ON s.id = dt.client')
+    rows = cursor.fetchall()
+    database.close()
+    return rows
+    
 class Lastochka:
     ''' Класс Lastochka сожержит информацию о клиенте'''
     def __init__(self, cl_socket, cl_adress):
@@ -285,7 +294,6 @@ async def main():
                             if data[1] == 'checking':
                                 cl.name = data[1]
                                 continue
-                            
                             cl.name = data[1]                            
 
                             # Если ласточка ещё не существует в базе, то создать, а если существует, то проверить отложенные задания
@@ -293,7 +301,6 @@ async def main():
                                 pass # Здесь будет проверка отложенных задач
                             else:
                                 newSwallowForBase(cl.name)
-
                             log(f'{cl.name} > подключился',event=1, event_client=cl.name)
 
                         # Если тип сообщения mes
@@ -301,11 +308,12 @@ async def main():
                             # imh - i'm here (Я тут) сообщение о выполняемой работе
                             if data[1] == 'imh':
                                 pass
-
+                            
+                            # Сообщение о начале удаления
                             if data[1] == 'preDestroy':
                                 log(f'{cl.name} > сообщил о начале удаления файлов', event=3, event_client=cl.name)
                             
-                            # destroy - сообщение о удалении файлов
+                            # Сообщение о завершении удаления
                             if data[1] == 'destroy':
                                 log(cl.name + ' > сообщил о завершении удаления файлов', event=4, event_client=cl.name)
                                 #  command = False
@@ -313,19 +321,35 @@ async def main():
                         if data[0] == 'check':
                             log(f'{cl.name} > проверка подключения к серверу', event=7, event_client=cl.name)
 
+                        # Обработчик запроса бота. Отправляет список машин в онлайне.
                         if data[0] == 'wol' and data[1] == 'telebot':
                             clients = 'telebot:'
                             for client in client_list:
                                 clients = clients + client.name + ','
-
                             clients = clients + ';'
-
                             cl.conn.send(clients.encode())
 
+                        # Обработчик запроса бота. Отправляет список всех зарагестрированных в базе машин.
+                        if data[0] == 'alc' and data[1] == 'telebot':
+                            clients = 'telebot:'
+                            tmp = swaalowsList()
+                            for client in tmp:
+                                clients = clients + client + ','
+                            clients = clients + ';'
+                            cl.conn.send(clients.encode())
+
+                        # Получает от бота имя и команду на уничтожение.
                         if data[0] == 'telebotdestroy':
-                            print(data[1])
                             global command_new
-                            command_new = f'/destroy={data[1]}'
+                            if(data[1] in client_list):
+                                command_new = f'/destroy={data[1]}'
+                            else:
+                                stat_task, text_task = destroyTask(data[1])
+                                cl.conn.send(text_task.encode())
+
+                        if data[0] == 'telebotUNdestroy':
+                            cancelDestroyTask(data[1])
+                            cl.conn.send(f'Отменено уничтожение {data[1]}'.encode())
 
                 except:
                     pass
@@ -356,6 +380,7 @@ async def main():
 
             no_command = False
 
+            # Если появилась новая команда
             if (command_old != command_new):
                 if (command_new[:1] != '/'):
                     print('Все комманды вводятся начинаются с /')
