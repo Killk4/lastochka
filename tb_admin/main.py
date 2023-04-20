@@ -8,7 +8,7 @@ bot = telebot.TeleBot('5849070562:AAFVcB_xCKwu2NA6x8xJg45SHHyq0PHKlqk')
 admins = []
 client_list = ['telebot', 'checking', '']
 
-server_IP = '10.10.8.122'
+server_IP = '10.0.8.244'
 server_PORT = 49999
 
 def newAdmin(name: str, nick: str, chatid: str) -> None:
@@ -115,6 +115,9 @@ def getList(chatid, message):
     alc - полный список клиентов'''
 
     onlines = ''
+    text_button = ''
+    text_message = ''
+    group = ''
 
     try:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -137,23 +140,52 @@ def getList(chatid, message):
                 for client in clients:
                     if client in client_list:
                         continue
+
+                    if(message == 'wol'):
+                        text_button = f'Уничтожить {client}'
+                        text_message = f'Список клиентов в сети:\n{onlines}'
+                        group = 'DANGER'
+                    elif(message == 'alc'):
+                        text_button = f'Уничтожить {client}'
+                        text_message = f'Список всех клиентов:\n{onlines}'
+                        group = 'DANGER'
+                    elif(message == 'selectAllWait'):
+                        text_button = f'Убрать {client} из очереди на уничтожение'
+                        text_message = f'Список всех клиентов в очереди на уничтожение:\n{onlines}'
+                        group = 'UNWAIT'
+
                     onlines = onlines + f'{client}\n'
-                    button = telebot.types.InlineKeyboardButton(text=f'Уничтожить {client}', callback_data=f'DANGER:{client}')
+                    button = telebot.types.InlineKeyboardButton(text=text_button, callback_data=f'{group}:{client}')
                     buttons.append(button)
 
-                button = telebot.types.InlineKeyboardButton(text='Скрыть клавиатуру', callback_data='DANGER:hidekeyboard')
+                button = telebot.types.InlineKeyboardButton(text='Скрыть клавиатуру', callback_data=f'{group}:hidekeyboard')
                 buttons.append(button)
                 keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
                 keyboard.add(*list(buttons))
 
-        bot.send_message(chatid, f'Список клиентов в сети:\n{onlines}', reply_markup=keyboard)
+        bot.send_message(chatid, text_message, reply_markup=keyboard)
+    except Exception as e:
+        print(e)
+        bot.send_message(chatid, 'Сервер недоступен!')
+
+def cancelWaiting(chatid, client):
+    try:
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        server.connect((server_IP, server_PORT))
+
+        start_message = 'name:telebot;'
+        wol_message = f'telebotUNdestroy:{client};'        # wol - who online
+        server.send(f'{start_message}{wol_message}'.encode())
+
+        bot.send_message(chatid, server.recv(2**20).decode())
     except Exception as e:
         print(e)
         bot.send_message(chatid, 'Сервер недоступен!')
 
 allAdmins() 
 
-@bot.message_handler(commands=['start', 'opme', 'list', 'temps', 'plan', 'cancel'])
+@bot.message_handler(commands=['start', 'opme', 'list', 'temps', 'plan', 'wait'])
 def handle_command(message):
     text = message.text
 
@@ -178,8 +210,8 @@ def handle_command(message):
         if('/plan' in text):
             getList(message.chat.id, 'alc')
 
-        if('/cancel' in text):
-            pass
+        if('/wait' in text):
+            getList(message.chat.id, 'selectAllWait')
     else:
         # Команды которые могут выполнить только не авторизованные
         pass
@@ -196,14 +228,25 @@ def on_danger_button_clicked(call):
     else:
         DestroyKeyboard(chatid, client)
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith('UNWAIT:'))
+def on_danger_button_clicked(call):
+    client = call.data.split(':')[1] # получаем имя клиента из callback_data
+    chatid = call.message.chat.id
+
+    # Скрыть клавиатуру
+    if client == 'hidekeyboard':
+        bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+    else:
+        cancelWaiting(chatid, client)
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith('DESTROY:'))
 def on_danger_button_clicked(call):
     choice = call.data.split(':')[1] # получаем выбор из callback_data
     client = call.data.split(':')[2] # получаем имя клиента из callback_data
 
     if(choice == 'yes'):
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=f"Создано задание на уничтожение {client}!")
         Destroy(client, call.message.chat.id)
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     if(choice == 'no'):
         bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
 

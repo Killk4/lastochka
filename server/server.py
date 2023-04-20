@@ -145,7 +145,17 @@ def selectAllWaitingDestroy() -> list:
     rows = cursor.fetchall()
     database.close()
     return rows
-    
+
+def checkDestroy(client):
+        database = sqlite3.connect('main.db')
+        cursor = database.cursor()
+        cursor.execute(f'SELECT * FROM destroy_task WHERE client = (SELECT id FROM swallows WHERE name = "{client}")')
+        if(len(cursor.fetchall()) > 0):
+            database.close()
+            return True
+        else:
+            database.close()
+            return False
 class Lastochka:
     ''' Класс Lastochka сожержит информацию о клиенте'''
     def __init__(self, cl_socket, cl_adress):
@@ -179,6 +189,7 @@ command = False     # Переменная отправки команды
 command_text = ''   # Переменная самого сообщения
 
 client_list = []    # Список активных клиентов
+noWriteClient = ['checking', 'telebot']
 
 sa = sys.argv[1:]   # Получение аргументов для запуска скрипта
 
@@ -265,6 +276,7 @@ async def print_input():
 # Создание отладочного окна
 async def main():
     global command
+    global noWriteClient
 
     while server_work:
         try:
@@ -291,14 +303,18 @@ async def main():
 
                         # Первым сообщением передаётся имя клиента
                         if data[0] == 'name':
-                            if data[1] == 'checking':
+                            if data[1] in noWriteClient:
                                 cl.name = data[1]
                                 continue
-                            cl.name = data[1]                            
+                            cl.name = data[1]      
+
+                            global command_new                      
 
                             # Если ласточка ещё не существует в базе, то создать, а если существует, то проверить отложенные задания
                             if(findSwallowForBase(cl.name)):
-                                pass # Здесь будет проверка отложенных задач
+                                if(checkDestroy(cl.name)):
+                                    command_new = f'/destroy={cl.name}'
+                                    cancelDestroyTask(cl.name)
                             else:
                                 newSwallowForBase(cl.name)
                             log(f'{cl.name} > подключился',event=1, event_client=cl.name)
@@ -340,16 +356,32 @@ async def main():
 
                         # Получает от бота имя и команду на уничтожение.
                         if data[0] == 'telebotdestroy':
-                            global command_new
-                            if(data[1] in client_list):
+                            clientNameInOnline = []
+                            for cl in client_list:
+                                clientNameInOnline.append(cl.name)
+                            if(data[1] in clientNameInOnline):
                                 command_new = f'/destroy={data[1]}'
+                                if(checkDestroy(data[1])):
+                                    cancelDestroyTask(data[1])
+                                cl.conn.send(f'{data[1]} начал процедуру удаления'.encode())
                             else:
                                 stat_task, text_task = destroyTask(data[1])
                                 cl.conn.send(text_task.encode())
+                            clientNameInOnline = []
 
+                        # Отмена уничтожения машины
                         if data[0] == 'telebotUNdestroy':
                             cancelDestroyTask(data[1])
                             cl.conn.send(f'Отменено уничтожение {data[1]}'.encode())
+
+                        # Получение списка всех машин в очереди на уничтожение 
+                        if data[0] == 'selectAllWait':
+                            waiting = 'telebot:'
+                            rows = selectAllWaitingDestroy()
+                            for row in rows:
+                                waiting += f'{row[2]},'
+                            waiting += ';'
+                            cl.conn.send(waiting.encode())
 
                 except:
                     pass
@@ -369,7 +401,7 @@ async def main():
                     
                 # Если не удалось отправить, то значит клиент оффлайн
                 except:
-                    if cl.name == 'checking':
+                    if cl.name in noWriteClient:
                         continue
                 
                     log(cl.name + ' > отключился', event=2, event_client=cl.name)
