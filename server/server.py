@@ -267,10 +267,13 @@ async def print_input():
     while server_work:
         global command_new
 
-        input_str = await asyncio.get_event_loop().run_in_executor(None, input)
-        input_str = input_str.replace(' ', '')
-        if (input_str != ''):
-            command_new = input_str
+        try:
+            input_str = await asyncio.get_event_loop().run_in_executor(None, input)
+            input_str = input_str.replace(' ', '')
+            if (input_str != ''):
+                command_new = input_str
+        except:
+            print('Попробуйте ещё раз')
 
 
 # Создание отладочного окна
