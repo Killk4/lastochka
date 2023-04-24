@@ -3,12 +3,12 @@ import socket
 import telebot
 import sqlite3
 
-bot = telebot.TeleBot('5849070562:AAFVcB_xCKwu2NA6x8xJg45SHHyq0PHKlqk')
+bot = telebot.TeleBot('')
 
 admins = []
-client_list = ['telebot', 'checking', '']
+client_list = ['telebot', 'checking', 'SERVER', '']
 
-server_IP = '10.0.8.244'
+server_IP = ''
 server_PORT = 49999
 
 def newAdmin(name: str, nick: str, chatid: str) -> None:
@@ -137,22 +137,23 @@ def getList(chatid, message):
                 clients = da[1].split(',')
                 
                 buttons = []
-                for client in clients:
-                    if client in client_list:
-                        continue
 
-                    if(message == 'wol'):
+                if(message == 'wol'):
                         text_button = f'Уничтожить {client}'
                         text_message = f'Список клиентов в сети:\n{onlines}'
                         group = 'DANGER'
-                    elif(message == 'alc'):
-                        text_button = f'Уничтожить {client}'
-                        text_message = f'Список всех клиентов:\n{onlines}'
-                        group = 'DANGER'
-                    elif(message == 'selectAllWait'):
-                        text_button = f'Убрать {client} из очереди на уничтожение'
-                        text_message = f'Список всех клиентов в очереди на уничтожение:\n{onlines}'
-                        group = 'UNWAIT'
+                elif(message == 'alc'):
+                    text_button = f'Уничтожить {client}'
+                    text_message = f'Список всех клиентов:\n{onlines}'
+                    group = 'DANGER'
+                elif(message == 'selectAllWait'):
+                    text_button = f'Убрать {client} из очереди на уничтожение'
+                    text_message = f'Список всех клиентов в очереди на уничтожение:\n{onlines}'
+                    group = 'UNWAIT'
+
+                for client in clients:
+                    if client in client_list:
+                        continue
 
                     onlines = onlines + f'{client}\n'
                     button = telebot.types.InlineKeyboardButton(text=text_button, callback_data=f'{group}:{client}')
