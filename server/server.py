@@ -43,14 +43,17 @@ def log(text, console=True, event: int = 0, event_client: str = 'None'):
     ct_date = time.strftime("%d-%m-%Y", time.localtime())    # Текущий день
     ct_time = time.strftime("%H:%M:%S", time.localtime())    # Текущее время
     try:
-        file = open('./logs/'+str(ct_date)+'.txt', 'a')          # Открыть файл
-        file.writelines(str(ct_time)+' '+text+'\n')              # Записать в файл
-        if(console):
-            print(str(ct_time)+' '+text)                         # Вывести в консоль
-        file.close()                                             # Закрыть файл
-    except:
-        os.makedirs('logs', 744)
-        log(text)
+        with open('./logs/'+str(ct_date)+'.txt', 'a') as file:  # Использование контекстного менеджера для автоматического закрытия файла
+            file.writelines(str(ct_time)+' '+text+'\n')              # Записать в файл
+            if(console):
+                print(str(ct_time)+' '+text)                         # Вывести в консоль
+    except OSError as e:
+        if e.errno == 24:
+            # Если слишком много файлов уже открыто, нужно обработать ошибку и повторить попытку позже
+            print("Слишком много файлов уже открыто. Повторите попытку позже.")
+            return
+        else:
+            raise e  # Перебросить остальные ошибки
 
     if(event != 0):
         database = sqlite3.connect('main.db')
@@ -58,6 +61,9 @@ def log(text, console=True, event: int = 0, event_client: str = 'None'):
         cursor.execute(f'INSERT INTO logs (event, client, logtime) SELECT {event}, id, {int(time.time())} FROM swallows WHERE name = "{event_client}"')
         database.commit()
         database.close()
+
+    return  # Добавлено для явного возврата из функции
+
 
 def helpCommand():
     print(' /help - Помощь\n',
