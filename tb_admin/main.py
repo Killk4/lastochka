@@ -139,16 +139,16 @@ def getList(chatid, message):
                 buttons = []
 
                 if(message == 'wol'):
-                        text_button = f'Уничтожить {client}'
-                        text_message = f'Список клиентов в сети:\n{onlines}'
-                        group = 'DANGER'
+                    text_button = f'Уничтожить'
+                    text_message = f'Список клиентов в сети:'
+                    group = 'DANGER'
                 elif(message == 'alc'):
-                    text_button = f'Уничтожить {client}'
-                    text_message = f'Список всех клиентов:\n{onlines}'
+                    text_button = f'Уничтожить'
+                    text_message = f'Список всех клиентов:'
                     group = 'DANGER'
                 elif(message == 'selectAllWait'):
-                    text_button = f'Убрать {client} из очереди на уничтожение'
-                    text_message = f'Список всех клиентов в очереди на уничтожение:\n{onlines}'
+                    text_button = f'Убрать из очереди на уничтожение'
+                    text_message = f'Список всех клиентов в очереди на уничтожение:'
                     group = 'UNWAIT'
 
                 for client in clients:
@@ -156,7 +156,7 @@ def getList(chatid, message):
                         continue
 
                     onlines = onlines + f'{client}\n'
-                    button = telebot.types.InlineKeyboardButton(text=text_button, callback_data=f'{group}:{client}')
+                    button = telebot.types.InlineKeyboardButton(text=f'{text_button} {client}', callback_data=f'{group}:{client}')
                     buttons.append(button)
 
                 button = telebot.types.InlineKeyboardButton(text='Скрыть клавиатуру', callback_data=f'{group}:hidekeyboard')
@@ -164,7 +164,7 @@ def getList(chatid, message):
                 keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
                 keyboard.add(*list(buttons))
 
-        bot.send_message(chatid, text_message, reply_markup=keyboard)
+        bot.send_message(chatid, f'{text_message}\n{onlines}', reply_markup=keyboard)
     except Exception as e:
         print(e)
         bot.send_message(chatid, 'Сервер недоступен!')
