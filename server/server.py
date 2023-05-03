@@ -481,8 +481,8 @@ async def main():
                     no_command = False
 
         # Проверка нажатия Ctrl + C
-        except KeyboardInterrupt:
-            break
+        except Exception as e:
+            print(e)
 
 # Запуск основных циклов
 input_thread = threading.Thread(target=asyncio.run, args=(print_input(),))
