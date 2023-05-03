@@ -258,12 +258,12 @@ if(rewrite):
     rewrite = False
 
 # Запуск сервера
-main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET работа с IPv4, SOCK_STREAM работа с TCP
-main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1) # Указывает на то, что не надо отправлять собранные пакеты, а слать информацию сразу
-main_socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
-main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
-main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5)
+main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     # AF_INET работа с IPv4, SOCK_STREAM работа с TCP
+main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)   # Указывает на то, что не надо отправлять собранные пакеты, а слать информацию сразу
+main_socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)   # Если от клиента нет связи больше 1 секунды, то удаляем его из стека
+main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)  # Время простоя клиента после которого он будет удалён из стека
+main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1) # Время между проверками статуса клиента
+main_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 2)   # Количество попыток проверки статуса клиента
 main_socket.bind((server_IP, server_PORT)) # Завязка сокета с IP и портом
 main_socket.setblocking(0) # Не останавливать выполнение программы пока получаем данные
 main_socket.listen(5) # Включение прослушки порта. 5 говорит о количестве одновременно подключаемых клиентов. 5 не максимальное количество клиентов!
