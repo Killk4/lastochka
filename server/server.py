@@ -415,12 +415,13 @@ async def main():
                     
                 # Если не удалось отправить, то значит клиент оффлайн
                 except:
+                    client_list.remove(cl)
+                    cl.conn.close()
+                    cl.socket.close()
                     if cl.name in noWriteClient:
                         continue
                 
                     log(cl.name + ' > отключился', event=2, event_client=cl.name)
-                    client_list.remove(cl)
-                    cl.conn.close()
 
             global command_old
 
