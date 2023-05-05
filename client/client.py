@@ -61,6 +61,8 @@ sa = argv[1:]                   # Получение аргументов для
 root_list = []   # Список удаляемых директорий
 rewrite = False  # Для флага перезаписи ini файла (--rewrite)
 
+need_recon = False # Переменная запуска процедуры переподключения к серверу
+
 # Перебор ключени и работа с ними
 if (sa != []):
     i = 0
@@ -317,6 +319,18 @@ if (running == False):
 
 while running:
 
+    if need_recon:
+        try:
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            server.connect((server_IP, server_PORT))
+
+            print('Соединение восстановленно!')
+            need_recon = False
+            start_one = True
+        except:
+            pass
+
     if start_one:
         start_message = 'name:' + myname + ';'
         server.send(start_message.encode())
@@ -345,5 +359,6 @@ while running:
                     server.close()
 
     except:
-        print('Связь с сервером разорвана')
-        running = False
+        if(not need_recon):
+            print('Связь с сервером разорвана')
+            need_recon = True

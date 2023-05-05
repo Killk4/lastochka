@@ -32,7 +32,7 @@ def main(adres:str, port:int) -> None:
     w.show()
     timer = QTimer()
     timer.timeout.connect(lambda: w.check_connection(adres, port))
-    timer.start(1000)
+    timer.start(10000)
     sys.exit(app.exec_())
 
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
             pass
     except:
         config['CONFIG'] = {
-            'server_ip' : '10.0.20.200',
+            'server_ip' : '83.169.242.38',
             'server_port' : 49999
         }
 
