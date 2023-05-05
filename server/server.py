@@ -417,7 +417,6 @@ async def main():
                 except:
                     client_list.remove(cl)
                     cl.conn.close()
-                    cl.socket.close()
                     if cl.name in noWriteClient:
                         continue
                 
