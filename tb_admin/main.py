@@ -1,9 +1,11 @@
-import time
+import os
 import socket
 import telebot
 import sqlite3
 
 bot = telebot.TeleBot('')
+
+dirname = os.path.dirname(__file__)
 
 admins = []
 client_list = ['telebot', 'checking', 'SERVER', '']
@@ -14,7 +16,7 @@ server_PORT = 49999
 def newAdmin(name: str, nick: str, chatid: str) -> None:
     ''' Функция для подачи заявки в администраторы
     Принимает Имя, Ник и chatid тележки.'''
-    database = sqlite3.connect('telegram.db')
+    database = sqlite3.connect(os.path.join(dirname, 'telegram.db'))
     count_ta = database.cursor()
     cursor = database.cursor()
 
@@ -31,7 +33,7 @@ def newAdmin(name: str, nick: str, chatid: str) -> None:
 
 def allAdmins() -> None:
     '''Функция переписывает массив с chatid администраторов бота для дальнейшей идентификации'''
-    database = sqlite3.connect('telegram.db')
+    database = sqlite3.connect(os.path.join(dirname, 'telegram.db'))
     cursor = database.cursor()
     cursor.execute("SELECT * from admins")
     rows = cursor.fetchall()
@@ -43,7 +45,7 @@ def TempAdminList(chatid) -> None:
     '''Функция выбирает всех админов из темпа и выводит список для решения'''
     buttons = []
     tempAdmin = ''
-    database = sqlite3.connect('telegram.db')
+    database = sqlite3.connect(os.path.join(dirname, 'telegram.db'))
     cursor = database.cursor()
     cursor.execute("SELECT * FROM adminTemp")
     rows = cursor.fetchall()
@@ -60,7 +62,7 @@ def TempAdminList(chatid) -> None:
 
 def AdminAllow(id, chatid) -> None:
     '''Функция одобрения нового администратора'''
-    database = sqlite3.connect('telegram.db')
+    database = sqlite3.connect(os.path.join(dirname, 'telegram.db'))
     add_admin = database.cursor()
     del_admin = database.cursor()
     cursor = database.cursor()
@@ -77,7 +79,7 @@ def AdminAllow(id, chatid) -> None:
 
 def AdminDeny(id, chatid) -> None:
     '''Функция отказа в привелегии администратора'''
-    database = sqlite3.connect('telegram.db')
+    database = sqlite3.connect(os.path.join(dirname, 'telegram.db'))
     cursor = database.cursor()
     cursor.execute(f'DELETE FROM adminTemp WHERE id={id}')
     database.commit()
