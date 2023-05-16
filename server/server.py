@@ -8,8 +8,10 @@ import sqlite3
 import threading
 import configparser
 
+dirname = os.path.dirname(__file__) # Путь папки проекта
 config = configparser.ConfigParser()
-config.read('server_conf.ini')
+config.read(os.path.join(dirname, 'server_conf.ini'))
+
 
 try:
     if(config['CONFIG']):
@@ -21,7 +23,7 @@ except:
     'work': 'True'
     }
 
-    with open('server_conf.ini', 'w') as configfile:
+    with open(os.path.join(dirname, 'server_conf.ini'), 'w') as configfile:
         config.write(configfile)
 
 def toBool(value):
@@ -47,7 +49,7 @@ def log(text, console=True, event: int = 0, event_client: str = 'None'):
     if ct_date in open_files:
         file = open_files[ct_date]
     else:
-        file = open('./logs/'+str(ct_date)+'.txt', 'a')
+        file = open(os.path.join(dirname, 'logs/'+str(ct_date)+'.txt'), 'a')
         open_files[ct_date] = file
 
     try:
@@ -58,7 +60,7 @@ def log(text, console=True, event: int = 0, event_client: str = 'None'):
         pass
 
     if event != 0:
-        database = sqlite3.connect('main.db')
+        database = sqlite3.connect(os.path.join(dirname, 'main.db'))
         cursor = database.cursor()
         cursor.execute(f'INSERT INTO logs (event, client, logtime) SELECT {event}, id, {int(time.time())} FROM swallows WHERE name = "{event_client}"')
         database.commit()
@@ -83,7 +85,7 @@ def stopServer():
 def findSwallowForBase(name: str) -> bool:
     '''Проверяет существование записи клиента в базе.
     Возвращает True если клиент найден'''
-    database = sqlite3.connect('main.db')
+    database = sqlite3.connect(os.path.join(dirname, 'main.db'))
     cursor = database.cursor()
     cursor.execute(f'SELECT * FROM `swallows` WHERE name = "{name}"')
     count = len(cursor.fetchall())
@@ -98,7 +100,7 @@ def newSwallowForBase(name: str, hash: str = None) -> bool:
     '''Создаёт новую запись о клиенте.
     Возвращает True если запись созданна успешно'''
     ret = False
-    database = sqlite3.connect('main.db')
+    database = sqlite3.connect(os.path.join(dirname, 'main.db'))
     cursor = database.cursor()
     if(hash == None):
         hash = 'NULL'
@@ -114,7 +116,7 @@ def newSwallowForBase(name: str, hash: str = None) -> bool:
 
 def swaalowsList() -> list:
     swallows = []
-    database = sqlite3.connect('main.db')
+    database = sqlite3.connect(os.path.join(dirname, 'main.db'))
     cursor = database.cursor()
     cursor.execute('SELECT * FROM swallows WHERE status = 1')
     rows = cursor.fetchall()
@@ -124,7 +126,7 @@ def swaalowsList() -> list:
     return swallows
 
 def destroyTask(client: str) -> str:
-    database = sqlite3.connect('main.db')
+    database = sqlite3.connect(os.path.join(dirname, 'main.db'))
     check = database.cursor()
     cursor = database.cursor()
 
@@ -139,14 +141,14 @@ def destroyTask(client: str) -> str:
         return False, f'Задание на устранение {client} уже существует'
 
 def cancelDestroyTask(client: str) -> None:
-    database = sqlite3.connect('main.db')
+    database = sqlite3.connect(os.path.join(dirname, 'main.db'))
     cursor = database.cursor()
     cursor.execute(f'DELETE FROM destroy_task WHERE client = (SELECT id FROM swallows WHERE name = "{client}")')
     database.commit()
     database.close()
 
 def selectAllWaitingDestroy() -> list:
-    database = sqlite3.connect('main.db')
+    database = sqlite3.connect(os.path.join(dirname, 'main.db'))
     cursor = database.cursor()
     cursor.execute('SELECT dt.*, s.name AS name FROM destroy_task AS dt JOIN swallows AS s ON s.id = dt.client')
     rows = cursor.fetchall()
@@ -154,7 +156,7 @@ def selectAllWaitingDestroy() -> list:
     return rows
 
 def checkDestroy(client):
-        database = sqlite3.connect('main.db')
+        database = sqlite3.connect(os.path.join(dirname, 'main.db'))
         cursor = database.cursor()
         cursor.execute(f'SELECT * FROM destroy_task WHERE client = (SELECT id FROM swallows WHERE name = "{client}")')
         if(len(cursor.fetchall()) > 0):
@@ -252,7 +254,7 @@ if(rewrite):
         'work': server_work
     }
 
-    with open('server_conf.ini', 'w') as configfile:
+    with open(os.path.join(dirname, 'server_conf.ini'), 'w') as configfile:
         config.write(configfile)
 
     rewrite = False
