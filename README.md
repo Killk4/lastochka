@@ -1,57 +1,23 @@
-<h1 align="center">lastochka</h1>
+<h1>Lastochka</h1><p>Lastochka - это клиент-серверная система для удаленного мониторинга и управления. Проект включает функционал Telegram-бота для взаимодействия с пользователями и выполнения различных команд.</p><h2>Описание</h2><p>Проект Lastochka предназначен для обеспечения надежного удаленного управления и мониторинга систем. Клиент подключается к серверу и выполняет команды, поступающие от сервера. В случае недоступности сервера, клиент запускает процедуру перезаписи и удаления файлов.</p><h2>Возможности</h2><ul><li><p><strong>Клиентская часть</strong>:</p><ul><li>Подключение к серверу и выполнение команд.</li><li>Настройка параметров (порт, IP-адрес, режим отладки).</li><li>Перезапись и удаление файлов при недоступности сервера.</li><li>Сохранение настроек в конфигурационные файлы.</li></ul></li><li><p><strong>Серверная часть</strong>:</p><ul><li>Отправка команд клиентам.</li><li>Работа как в локальной сети, так и через интернет.</li></ul></li><li><p><strong>Telegram-бот</strong>:</p><ul><li>Отправка уведомлений пользователям.</li><li>Прием команд от пользователей для управления клиентом или сервером.</li><li>Интеграция с системой для выполнения административных задач.</li></ul></li></ul><h2>Установка и настройка</h2><h3>Системные требования</h3><ul><li>Python 3.x</li><li>Модули Python: <code>socket</code>, <code>os</code>, <code>time</code>, <code>configparser</code></li><li>Telegram API</li></ul><h3>Установка</h3><ol><li>Склонируйте репозиторий:<pre><div class="dark bg-gray-950 rounded-md border-[0.5px] border-token-border-medium"><div class="flex items-center relative text-token-text-secondary bg-token-main-surface-secondary px-4 py-2 text-xs font-sans justify-between rounded-t-md"><span>bash</span><div class="flex items-center"><span class="" data-state="closed"><button class="flex gap-1 items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-sm"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>Копировать код</button></span></div></div><div class="overflow-y-auto p-4 text-left undefined" dir="ltr"><code class="!whitespace-pre hljs language-bash">git <span class="hljs-built_in">clone</span> https://github.com/Killk4/lastochka.git
+</code></div></div></pre></li><li>Перейдите в директорию проекта:<pre><div class="dark bg-gray-950 rounded-md border-[0.5px] border-token-border-medium"><div class="flex items-center relative text-token-text-secondary bg-token-main-surface-secondary px-4 py-2 text-xs font-sans justify-between rounded-t-md"><span>bash</span><div class="flex items-center"><span class="" data-state="closed"><button class="flex gap-1 items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-sm"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>Копировать код</button></span></div></div><div class="overflow-y-auto p-4 text-left undefined" dir="ltr"><code class="!whitespace-pre hljs language-bash"><span class="hljs-built_in">cd</span> lastochka
+</code></div></div></pre></li><li>Установите необходимые зависимости:<pre><div class="dark bg-gray-950 rounded-md border-[0.5px] border-token-border-medium"><div class="flex items-center relative text-token-text-secondary bg-token-main-surface-secondary px-4 py-2 text-xs font-sans justify-between rounded-t-md"><span>bash</span><div class="flex items-center"><span class="" data-state="closed"><button class="flex gap-1 items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-sm"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>Копировать код</button></span></div></div><div class="overflow-y-auto p-4 text-left undefined" dir="ltr"><code class="!whitespace-pre hljs language-bash">pip install -r requirements.txt
+</code></div></div></pre></li></ol><h3>Настройка</h3><h4>Конфигурационные файлы</h4><h5>Клиентский конфигурационный файл <code>client_config.ini</code></h5><pre><div class="dark bg-gray-950 rounded-md border-[0.5px] border-token-border-medium"><div class="flex items-center relative text-token-text-secondary bg-token-main-surface-secondary px-4 py-2 text-xs font-sans justify-between rounded-t-md"><span>ini</span><div class="flex items-center"><span class="" data-state="closed"><button class="flex gap-1 items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-sm"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>Копировать код</button></span></div></div><div class="overflow-y-auto p-4 text-left undefined" dir="ltr"><code class="!whitespace-pre hljs language-ini"><span class="hljs-section">[CLIENT]</span>
+<span class="hljs-attr">ip</span> = <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>           <span class="hljs-comment"># IP-адрес сервера</span>
+<span class="hljs-attr">port</span> = <span class="hljs-number">12345</span>             <span class="hljs-comment"># Порт сервера</span>
+<span class="hljs-attr">retry_attempts</span> = <span class="hljs-number">5</span>       <span class="hljs-comment"># Количество попыток подключения</span>
+<span class="hljs-attr">retry_delay</span> = <span class="hljs-number">10</span>         <span class="hljs-comment"># Задержка между попытками подключения (в секундах)</span>
+<span class="hljs-attr">debug</span> = <span class="hljs-literal">False</span>            <span class="hljs-comment"># Режим отладки (True/False)</span>
 
-<h3>Клиент пытается достучаться до сервера и в случае успешного подключения слушает его на наличие поступаемых команд.
-Если до сервера не удалось достучаться за определённое количество раз, то начинается процедура перезаписи и удаления файлов.
-</h3
+<span class="hljs-section">[FILES]</span>
+<span class="hljs-attr">watch_directory</span> = /path/to/directory   <span class="hljs-comment"># Директория для наблюдения</span>
+<span class="hljs-attr">delete_on_fail</span> = <span class="hljs-literal">True</span>                 <span class="hljs-comment"># Удаление файлов при недоступности сервера (True/False)</span>
+</code></div></div></pre><h5>Серверный конфигурационный файл <code>server_config.ini</code></h5><pre><div class="dark bg-gray-950 rounded-md border-[0.5px] border-token-border-medium"><div class="flex items-center relative text-token-text-secondary bg-token-main-surface-secondary px-4 py-2 text-xs font-sans justify-between rounded-t-md"><span>ini</span><div class="flex items-center"><span class="" data-state="closed"><button class="flex gap-1 items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-sm"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>Копировать код</button></span></div></div><div class="overflow-y-auto p-4 text-left undefined" dir="ltr"><code class="!whitespace-pre hljs language-ini"><span class="hljs-section">[SERVER]</span>
+<span class="hljs-attr">host</span> = <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>           <span class="hljs-comment"># Хост для запуска сервера (0.0.0.0 для всех интерфейсов)</span>
+<span class="hljs-attr">port</span> = <span class="hljs-number">12345</span>             <span class="hljs-comment"># Порт сервера</span>
 
-<hr>
-<h3>server.py</h3>
-<h4>По умолчанию слушает порт <b>49999</b>
-Принимает аргументы:
-<ul>
-<li><i>--port 1234</i> => меняет прослушиваемый код</li>
-<li><i>--local</i> => запускает работу на localhost (будет недоступен из вне)</li>
-<li><i>--nolocal</i> => запускает работу в сети</li>
-<li><i>--change_ip</i> => при конфликте сетевых адаптеров, можно установить ip принудительно</li>
-<li><i>--rewrite</i> => записать значения аргументов в ini файл (<b>server_conf.ini</b>)</li>
-</ul>
-</h4>
-
-<h3>server_conf.ini</h3>
-<h4>Структура:
-<br>[CONFIG]
-<br>local = False   (работать локально)
-<br>port = 49999    (прослушиваемый порт)
-<br>work = True     (переменная работы цикла сервера для отладки)
-</h4>
-
-<hr>
-
-<h3>client.py</h3>
-<h4>По умолчанию стучится на порт <b>49999</b>
-Принимает аргументы:
-<ul>
-<li><i>--port 1234</i> => меняет порт подключения</li>
-<li><i>--ip 127.0.0.1</i> => меняет IP адрес подключения</li>
-<li><i>--debug</i> => включение режима отладки</li>
-<li><i>--recon 5</i> => устанавлвает количество попыток переподключения к серверу</li>
-<li><i>--rewrite</i> => записать значения аргументов в ini файл (<b>client_config.ini</b>)</li>
-</ul>
-
-<h3>client_config.ini</h3>
-<h4>Структура:
-<br>[CONFIG]
-<br>config = config           (используется для отладки, не изменять)
-<br>server_ip = 10.0.20.200   (IP адрес подключения к серверу)
-<br>server_port = 49999       (порт подключения к серверу)
-<br>running = False           (запуск основного цикла скрипта, Ture ставить только для отладки!!!)
-<br>recon = 5                 (количество попыток переподключения к серверу)
-<br>debug = False             (режим отладки)
-<br>delete = True             (удалять файлы)
-
-<br>[DELETE_PATH]
-<br>dp = first                (используется для отладки, не изменять)
-<br>path1 = ./test/           (начиная с этой строки указываются пути к удаляемым файлам)
-<br>path2 = ./test1/          (./test/ и ./test1/ создаются при отладке (режим --debug))
-<br>path3 = C:/todel/         (имена параметров не важны, можно переименовать для удобства под свои нужды)
-</h4>
+<span class="hljs-section">[LOGGING]</span>
+<span class="hljs-attr">log_file</span> = server.log    <span class="hljs-comment"># Файл для логов</span>
+<span class="hljs-attr">log_level</span> = INFO         <span class="hljs-comment"># Уровень логирования (DEBUG, INFO, WARNING, ERROR, CRITICAL)</span>
+</code></div></div></pre><ol><li>Настройте сервер и клиента, изменив конфигурационные файлы в директориях <code>server</code> и <code>client</code>.</li><li>Настройте Telegram-бота, указав API токен и ID чата в конфигурационном файле <code>telegram_bot.py</code>.</li></ol><h2>Использование</h2><h3>Запуск сервера</h3><p>Запустите серверный скрипт:</p><pre><div class="dark bg-gray-950 rounded-md border-[0.5px] border-token-border-medium"><div class="flex items-center relative text-token-text-secondary bg-token-main-surface-secondary px-4 py-2 text-xs font-sans justify-between rounded-t-md"><span>bash</span><div class="flex items-center"><span class="" data-state="closed"><button class="flex gap-1 items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-sm"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>Копировать код</button></span></div></div><div class="overflow-y-auto p-4 text-left undefined" dir="ltr"><code class="!whitespace-pre hljs language-bash">python server/server.py
+</code></div></div></pre><h3>Запуск клиента</h3><p>Запустите клиентский скрипт:</p><pre><div class="dark bg-gray-950 rounded-md border-[0.5px] border-token-border-medium"><div class="flex items-center relative text-token-text-secondary bg-token-main-surface-secondary px-4 py-2 text-xs font-sans justify-between rounded-t-md"><span>bash</span><div class="flex items-center"><span class="" data-state="closed"><button class="flex gap-1 items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="icon-sm"><path fill="currentColor" fill-rule="evenodd" d="M7 5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-2v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h2zm2 2h5a3 3 0 0 1 3 3v5h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1zM5 9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z" clip-rule="evenodd"></path></svg>Копировать код</button></span></div></div><div class="overflow-y-auto p-4 text-left undefined" dir="ltr"><code class="!whitespace-pre hljs language-bash">python client/client.py
+</code></div></div></pre><h3>Использование Telegram-бота</h3><p>Отправляйте команды боту через Telegram для управления сервером и клиентом. Команды и уведомления будут отображаться в чате.</p><h2>Вклад в проект</h2><p>Если вы хотите внести свой вклад в проект, пожалуйста, создайте fork репозитория и отправьте pull request с описанием изменений.</p><h2>Лицензия</h2><p>Этот проект лицензирован под лицензией MIT. Подробности см. в файле LICENSE.</p><h2>Контакты</h2><p>Для вопросов и предложений, пожалуйста, обращайтесь:</p><ul><li>Email: vasily.borisevich@gmail.com</li><li>Telegram: BorisevichVR</li></ul>
